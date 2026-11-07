@@ -54,3 +54,20 @@
 .rv-sub { margin: 0 0 14px; font-size: 18px; line-height: 1.55; min-height: 2.9em; }
 .rv-controls { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; margin-bottom: 10px; }
 .btn-lg { min-height: 60px; font-size: 20px; }
+
+/* 날씨 */
+.weather {
+  margin-top: 10px; padding: 10px 14px; border: var(--line); border-radius: 14px; background: #e3eef0;
+  font-size: 14.5px; line-height: 1.55;
+}
+.weather.muted { background: var(--paper); }
+.weather-main { display: flex; align-items: center; gap: 8px; }
+.weather-icon { font-size: 1.6em; line-height: 1; }
+.weather-tip { font-weight: 700; color: var(--teal); }
+.weather-lg { margin: 0 0 14px; }
+
+/* 화장실 마커 */
+.pin-wc {
+  font-size: 13px; line-height: 1; padding: 3px 4px; border-radius: 8px;
+  background: #fff; border: 1.5px solid var(--brown); transform: translateY(-50%);
+}

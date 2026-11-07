@@ -6,12 +6,15 @@ import { CATEGORIES } from '../../data/places.js'
 import { getCourse } from '../../data/courses.js'
 import { START_GUIDE } from '../../data/transit.js'
 import { buildSchedule, scheduleWarnings, fmtTime, formatWhen } from '../../lib/schedule.js'
+import WeatherBox from '../../components/route/WeatherBox.jsx'
+import { useRestrooms } from '../../lib/useRouteExtras.js'
 
 export default function CourseSheet({ course, hardIds, likeIds, onRemove, onSwap, onPreview, onClose }) {
   const { route, stops, mode, courseId, date, time } = course
   const preset = courseId ? getCourse(courseId) : null
   const schedule = useMemo(() => buildSchedule(route, time), [route, time])
   const warnings = useMemo(() => scheduleWarnings(route, date, schedule), [route, date, schedule])
+  const restrooms = useRestrooms(stops)
 
   if (!stops.length) {
     return (
@@ -31,6 +34,7 @@ export default function CourseSheet({ course, hardIds, likeIds, onRemove, onSwap
         <input type="time" value={time} step={600} onChange={(e) => course.setField('time', e.target.value)} aria-label="출발 시각" />
         {(date || time) && <span className="when-v">{formatWhen(date, time)} 출발</span>}
       </div>
+      <WeatherBox date={date} time={time} />
       {warnings.length > 0 && (
         <div className="notice-box warn" style={{ marginTop: 8 }} role="alert">
           {warnings.map((w) => (
@@ -73,6 +77,9 @@ export default function CourseSheet({ course, hardIds, likeIds, onRemove, onSwap
                     {CATEGORIES[p.cat].label}
                     {p.custom && ' · 카카오맵'}
                     {s && <b className={`cs-time ${warn ? 'warn' : ''}`}> · {fmtTime(s.arrive)} 도착 · {s.stay}분</b>}
+                  </span>
+                  <span className="cs-wc">
+                    🚻 {restrooms.byStop[p.id] ? `화장실 ${Math.max(10, Math.round(restrooms.byStop[p.id].meters / 10) * 10)}m` : '근처 화장실 정보 없음'}
                   </span>
                   {hard && <span className="cs-flag">😮‍💨 부모님: 여기는 힘들 것 같아요</span>}
                   {like && <span className="cs-like">👍 부모님이 좋대요</span>}

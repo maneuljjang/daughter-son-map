@@ -1,4 +1,5 @@
-import { distance, lerp } from './geo.js'
+import { distance, lerp, pointAlong } from './geo.js'
+import { legKey } from './walkRoute.js'
 import { PLACE_LIST, STATION, getPlace } from '../data/places.js'
 
 export const WALK_FACTOR = 1.3 // 직선 거리 × 1.3 = 추정 도보 거리
@@ -50,40 +51,41 @@ export function difficultyOf(meters, hasHill) {
 }
 
 /**
+ * 두 지점 사이 한 구간. paths 에 실제 걷는 길(TMAP)이 있으면 그 거리·경로를, 없으면 직선 × 1.3 추정치를 씁니다.
+ */
+function leg(from, to, paths) {
+  const real = paths?.[legKey(from, to)]
+  const walk = real ? real.meters : walkDistance(from, to)
+  return { from, to, walk, minutes: walkMinutes(walk), real: Boolean(real), path: real?.coords || null }
+}
+
+/**
  * 장소 목록(이미 정한 순서) → 루트 정보
  * 시작 지점까지는 버스/택시로 올라가므로 걷는 거리에 넣지 않습니다.
  */
-export function buildRoute(stops, station = STATION) {
+export function buildRoute(stops, station = STATION, paths = null) {
   if (!stops.length) {
-    return { stops, segments: [], finalLeg: null, totalWalk: 0, totalMinutes: 0, difficulty: '하', hasHill: false, uphillCount: 0 }
+    return { stops, segments: [], finalLeg: null, totalWalk: 0, totalMinutes: 0, difficulty: '하', hasHill: false, uphillCount: 0, real: false }
   }
   const segments = []
   for (let i = 0; i < stops.length - 1; i++) {
     const from = stops[i]
     const to = stops[i + 1]
-    const walk = walkDistance(from, to)
     segments.push({
       index: i,
-      from,
-      to,
-      walk,
-      minutes: walkMinutes(walk),
+      ...leg(from, to, paths),
       uphill: to.alt < from.alt, // 숫자가 작아지면 더 높은 곳으로 올라감
     })
   }
 
   const last = stops[stops.length - 1]
-  const finalWalk = walkDistance(last, station)
-  const finalLeg = {
-    from: last,
-    to: station,
-    walk: finalWalk,
-    minutes: walkMinutes(finalWalk),
-    walkable: finalWalk <= FINAL_WALK_MAX,
-  }
+  // 역까지 걸을지는 추정치로 먼저 판단 (실제 길이 있으면 그 거리로)
+  const final = leg(last, station, paths)
+  const finalLeg = { ...final, walkable: final.walk <= FINAL_WALK_MAX }
 
-  const walkSum = segments.reduce((s, x) => s + x.walk, 0) + (finalLeg.walkable ? finalWalk : 0)
+  const walkSum = segments.reduce((s, x) => s + x.walk, 0) + (finalLeg.walkable ? finalLeg.walk : 0)
   const hasHill = stops.some((p) => p.hill)
+  const counted = finalLeg.walkable ? [...segments, finalLeg] : segments
 
   return {
     stops,
@@ -94,18 +96,33 @@ export function buildRoute(stops, station = STATION) {
     difficulty: difficultyOf(walkSum, hasHill),
     hasHill,
     uphillCount: segments.filter((s) => s.uphill).length,
+    real: counted.length > 0 && counted.every((x) => x.real), // 모든 걷는 구간이 실제 길 기준인지
   }
 }
 
-/** 걷는 길을 그릴 좌표 목록 (마지막에 역까지 걸어가면 역도 포함) */
+/** 실제 길을 불러올 구간 목록 (장소 사이 + 마지막 장소 → 역) */
+export function legsToFetch(stops, station = STATION) {
+  const pairs = []
+  for (let i = 0; i < stops.length - 1; i++) pairs.push([stops[i], stops[i + 1]])
+  if (stops.length) pairs.push([stops[stops.length - 1], station])
+  return pairs
+}
+
+/** 걷는 길을 그릴 좌표 목록 (실제 길이 있으면 골목을 따라, 마지막에 역까지 걸어가면 역도 포함) */
 export function routePath(route) {
-  const pts = route.stops.map((p) => ({ lat: p.lat, lng: p.lng }))
-  if (route.finalLeg?.walkable) pts.push({ lat: route.finalLeg.to.lat, lng: route.finalLeg.to.lng })
+  if (!route.stops.length) return []
+  const legs = route.finalLeg?.walkable ? [...route.segments, route.finalLeg] : route.segments
+  const pts = [{ lat: route.stops[0].lat, lng: route.stops[0].lng }]
+  for (const l of legs) {
+    if (l.path) pts.push(...l.path)
+    pts.push({ lat: l.to.lat, lng: l.to.lng })
+  }
   return pts
 }
 
 /**
  * 미리 걸어보기용 지점 목록: 장소 + 구간마다 중간 지점 2~3개
+ * (실제 길이 있으면 그 길 위의 지점, 없으면 직선 위의 지점)
  */
 export function walkSteps(route) {
   const steps = []
@@ -113,11 +130,13 @@ export function walkSteps(route) {
   if (route.finalLeg?.walkable) legs.push({ ...route.finalLeg, index: route.segments.length })
   route.stops.forEach((stop, i) => {
     steps.push({ kind: 'stop', stop, order: i + 1, pos: { lat: stop.lat, lng: stop.lng } })
-    const leg = legs[i]
-    if (!leg) return
-    const n = leg.walk > 450 ? 3 : 2
+    const l = legs[i]
+    if (!l) return
+    const n = l.walk > 450 ? 3 : 2
     for (let k = 1; k <= n; k++) {
-      steps.push({ kind: 'path', from: leg.from, to: leg.to, part: k, parts: n, pos: lerp(leg.from, leg.to, k / (n + 1)) })
+      const t = k / (n + 1)
+      const pos = l.path ? pointAlong(l.path, t) : lerp(l.from, l.to, t)
+      steps.push({ kind: 'path', from: l.from, to: l.to, part: k, parts: n, pos })
     }
   })
   if (route.finalLeg?.walkable) {

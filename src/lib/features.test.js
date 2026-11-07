@@ -93,3 +93,62 @@ describe('성북동 범위', () => {
     expect(legalDongOf('서울 성북구 동소문동1가 20')).toBe('동소문동1가')
   })
 })
+
+import { adviceOf, describeCode, daysFromToday } from './weather.js'
+import { parseTmap } from './walkRoute.js'
+import { legKey } from './walkRoute.js'
+import { pointAlong } from './geo.js'
+import { routePath, walkSteps } from './route.js'
+import { STATION } from '../data/places.js'
+
+describe('날씨', () => {
+  it('코드 → 말', () => {
+    expect(describeCode(0).text).toBe('맑음')
+    expect(describeCode(63).text).toBe('비')
+  })
+  it('한마디', () => {
+    expect(adviceOf({ code: 61, tMin: 10, tMax: 15, rain: 80 })[0]).toContain('우산')
+    expect(adviceOf({ code: 0, tMin: 1, tMax: 8, rain: 0 }).join()).toContain('두툼')
+    expect(adviceOf({ code: 1, tMin: 12, tMax: 20, rain: 10 })).toEqual(['걷기 좋은 날씨예요.'])
+  })
+  it('며칠 뒤', () => {
+    expect(daysFromToday('2026-11-10', new Date('2026-11-08T12:00:00+09:00'))).toBe(2)
+  })
+})
+
+describe('실제 걷는 길', () => {
+  const tmap = {
+    features: [
+      { geometry: { type: 'Point', coordinates: [126.99, 37.59] }, properties: { totalDistance: 420, totalTime: 360 } },
+      { geometry: { type: 'LineString', coordinates: [[126.99, 37.59], [126.991, 37.5905]] }, properties: {} },
+      { geometry: { type: 'LineString', coordinates: [[126.991, 37.5905], [126.992, 37.591]] }, properties: {} },
+    ],
+  }
+  it('TMAP 응답 읽기 (겹치는 점은 한 번만)', () => {
+    const w = parseTmap(tmap)
+    expect(w.meters).toBe(420)
+    expect(w.coords).toHaveLength(3)
+    expect(parseTmap({})).toBeNull()
+  })
+  it('길 위의 지점', () => {
+    const mid = pointAlong([{ lat: 0, lng: 0 }, { lat: 0, lng: 1 }, { lat: 0, lng: 2 }], 0.5)
+    expect(mid.lng).toBeCloseTo(1, 5)
+  })
+  it('실제 길이 있으면 거리·선·라벨이 바뀐다', () => {
+    const stops = P(['seonjam', 'napoleon'])
+    const est = buildRoute(stops)
+    expect(est.real).toBe(false)
+    const coords = [{ lat: 37.592, lng: 127.0 }, { lat: 37.590, lng: 127.003 }]
+    const paths = {
+      [legKey(stops[0], stops[1])]: { meters: 999, coords },
+      [legKey(stops[1], STATION)]: { meters: 150, coords: [{ lat: 37.5888, lng: 127.006 }] },
+    }
+    const real = buildRoute(stops, STATION, paths)
+    expect(real.segments[0].walk).toBe(999)
+    expect(real.real).toBe(true)
+    expect(real.totalWalk).toBe(999 + 150)
+    expect(routePath(real).length).toBe(1 + 2 + 1 + 1 + 1)
+    const pathStep = walkSteps(real).find((s) => s.kind === 'path')
+    expect(pathStep.pos.lat).toBeLessThan(37.5932) // 직선이 아니라 길 위 지점
+  })
+})

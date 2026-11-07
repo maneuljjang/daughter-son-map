@@ -24,3 +24,21 @@ export function bearing(a, b) {
 export function lerp(a, b, t) {
   return { lat: a.lat + (b.lat - a.lat) * t, lng: a.lng + (b.lng - a.lng) * t }
 }
+
+/** 여러 점으로 된 길에서 전체 길이의 t(0~1) 지점 */
+export function pointAlong(coords, t) {
+  if (coords.length < 2) return coords[0]
+  const lens = []
+  let total = 0
+  for (let i = 1; i < coords.length; i++) {
+    const d = distance(coords[i - 1], coords[i])
+    lens.push(d)
+    total += d
+  }
+  let target = total * t
+  for (let i = 0; i < lens.length; i++) {
+    if (target <= lens[i] || i === lens.length - 1) return lerp(coords[i], coords[i + 1], lens[i] ? Math.min(target / lens[i], 1) : 0)
+    target -= lens[i]
+  }
+  return coords[coords.length - 1]
+}

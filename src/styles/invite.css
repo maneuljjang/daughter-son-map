@@ -1,67 +1,82 @@
 /* 부모님 화면: 본문 18px 이상, 버튼은 크고 단순하게 */
-.invite { padding: 0 16px calc(110px + var(--safe-bottom)); font-size: 18px; line-height: 1.65; }
+.invite { padding: 0 16px calc(110px + var(--safe-bottom)); font-size: calc(18px * var(--fs, 1)); line-height: 1.65; }
 
 .iv-cover { padding: 26px 0 8px; }
-.iv-from { margin: 0 0 10px; font-weight: 700; font-size: 17px; }
-.iv-headline { font-size: 40px; line-height: 1.22; margin-bottom: 16px; }
+.iv-from { margin: 0 0 10px; font-weight: 700; font-size: calc(17px * var(--fs, 1)); }
+.iv-headline { font-size: calc(40px * var(--fs, 1)); line-height: 1.22; margin-bottom: 16px; }
 .iv-hl { background: var(--butter); padding: 0 8px; border-radius: 10px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 .iv-when {
   display: inline-block; margin: 0 0 14px; padding: 6px 14px; border: var(--line); border-radius: 999px;
-  background: var(--paper); font-weight: 900; font-size: 20px; box-shadow: var(--shadow-sm);
+  background: var(--paper); font-weight: 900; font-size: calc(20px * var(--fs, 1)); box-shadow: var(--shadow-sm);
 }
-.iv-time { margin: 0 0 12px; font-weight: 900; font-size: 19px; color: var(--teal); }
-.iv-place-line { font-weight: 700; font-size: 18px; margin: 0 0 14px; }
+.iv-time { margin: 0 0 12px; font-weight: 900; font-size: calc(19px * var(--fs, 1)); color: var(--teal); }
+.iv-place-line { font-weight: 700; font-size: calc(18px * var(--fs, 1)); margin: 0 0 14px; }
 .iv-arrow { color: var(--tomato); }
-.iv-start { margin-top: 14px; font-size: 18px; }
-.iv-walk { margin-top: 16px; min-height: 66px; font-size: 22px; }
-.iv-hint { text-align: center; margin: 8px 0 0; font-size: 16px; color: var(--brown-soft); }
+.iv-start { margin-top: 14px; font-size: calc(18px * var(--fs, 1)); }
+.iv-walk { margin-top: 16px; min-height: 66px; font-size: calc(22px * var(--fs, 1)); }
+.iv-hint { text-align: center; margin: 8px 0 0; font-size: calc(16px * var(--fs, 1)); color: var(--brown-soft); }
 
 .iv-section { margin-top: 30px; }
-.iv-h2 { font-size: 28px; margin-bottom: 12px; }
+.iv-h2 { font-size: calc(28px * var(--fs, 1)); margin-bottom: 12px; }
 .iv-map { height: 360px; box-shadow: var(--shadow); }
-.iv-note { font-size: 17px; color: var(--brown-soft); margin: 10px 0; }
+.iv-note { font-size: calc(17px * var(--fs, 1)); color: var(--brown-soft); margin: 10px 0; }
 
 .iv-list { list-style: none; margin: 0; padding: 0; }
 .iv-card { padding: 16px; }
 .iv-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .iv-num {
   width: 46px; height: 46px; border-radius: 50%; flex: none; display: grid; place-items: center;
-  border: var(--line); color: #fff; font-family: var(--font-title); font-size: 24px; box-shadow: var(--shadow-sm);
+  border: var(--line); color: #fff; font-family: var(--font-title); font-size: calc(24px * var(--fs, 1)); box-shadow: var(--shadow-sm);
 }
-.iv-cat { font-size: 16px; font-weight: 700; color: var(--brown-soft); }
-.iv-name { font-size: 26px; }
-.iv-desc { margin: 12px 0 8px; font-size: 19px; }
-.iv-dl { margin: 0 0 12px; font-size: 18px; }
+.iv-cat { font-size: calc(16px * var(--fs, 1)); font-weight: 700; color: var(--brown-soft); }
+.iv-name { font-size: calc(26px * var(--fs, 1)); }
+.iv-desc { margin: 12px 0 8px; font-size: calc(19px * var(--fs, 1)); }
+.iv-dl { margin: 0 0 12px; font-size: calc(18px * var(--fs, 1)); }
 .iv-dl dt { font-weight: 900; margin-top: 8px; }
 .iv-dl dd { margin: 0; }
-.iv-peek { min-height: 56px; font-size: 18px; margin-bottom: 12px; }
+.iv-peek { min-height: 56px; font-size: calc(18px * var(--fs, 1)); margin-bottom: 12px; }
 
 .iv-votes { display: grid; grid-template-columns: 1fr; gap: 10px; }
 .iv-vote {
   min-height: 60px; border: var(--line); border-radius: 16px; background: var(--paper);
-  font-size: 20px; font-weight: 900; box-shadow: var(--shadow-sm);
+  font-size: calc(20px * var(--fs, 1)); font-weight: 900; box-shadow: var(--shadow-sm);
 }
 .iv-vote:active { transform: translate(2px, 2px); box-shadow: none; }
 .iv-vote.like.on { background: #cfe3a6; }
 .iv-vote.hard.on { background: var(--pink); }
 .iv-vote.on::after { content: ' ✓'; }
 
-.invite .segment-body { font-size: 17px; }
-.iv-foot { font-size: 18px; }
+.invite .segment-body { font-size: calc(17px * var(--fs, 1)); }
+.iv-foot { font-size: calc(18px * var(--fs, 1)); }
 
 .iv-bar {
   position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; z-index: 40;
   width: 100%; max-width: 520px; padding: 10px 16px calc(12px + var(--safe-bottom));
   background: linear-gradient(to top, var(--cream) 70%, rgba(251, 241, 211, 0));
 }
-.iv-bar .btn { min-height: 64px; font-size: 22px; box-shadow: var(--shadow); }
+.iv-bar .btn { min-height: 64px; font-size: calc(22px * var(--fs, 1)); box-shadow: var(--shadow); }
 
-.iv-sheet { font-size: 18px; }
-.iv-sheet .sheet-head .title { font-size: 26px; }
+.iv-sheet { font-size: calc(18px * var(--fs, 1)); }
+.iv-sheet .sheet-head .title { font-size: calc(26px * var(--fs, 1)); }
 .iv-textarea {
   width: 100%; border: var(--line); border-radius: 14px; padding: 12px 14px; background: var(--paper);
-  font-size: 19px; line-height: 1.6; resize: vertical;
+  font-size: calc(19px * var(--fs, 1)); line-height: 1.6; resize: vertical;
 }
 
 .iv-empty { margin-top: 40px; padding: 24px; text-align: center; }
-.iv-empty .title { font-size: 28px; margin-bottom: 8px; }
+.iv-empty .title { font-size: calc(28px * var(--fs, 1)); margin-bottom: 8px; }
+
+/* 글자 크기 버튼 */
+.fs-buttons { position: absolute; top: 14px; right: 0; display: flex; gap: 4px; z-index: 5; }
+.fs-btn {
+  min-width: 44px; height: 40px; padding: 0 8px; border: 2px solid var(--brown); border-radius: 10px;
+  background: var(--paper); font-weight: 900; font-size: 16px;
+}
+.fs-btn:nth-child(2) { font-size: 18px; }
+.fs-btn:nth-child(3) { font-size: 20px; }
+.fs-btn.on { background: var(--brown); color: var(--cream); }
+.invite { position: relative; }
+.iv-cover { padding-top: 64px; }
+.invite .weather { font-size: calc(18px * var(--fs, 1)); }
+.invite .summary-lg .summary-k { font-size: calc(15px * var(--fs, 1)); }
+.invite .summary-lg .summary-v { font-size: calc(21px * var(--fs, 1)); }

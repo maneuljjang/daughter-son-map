@@ -7,7 +7,7 @@ export default function RouteSummary({ route, large = false }) {
       <div className="summary-item">
         <span className="summary-k">걷는 길</span>
         <span className="summary-v">
-          {formatKm(route.totalWalk)} <span className="estimate">추정치</span>
+          {formatKm(route.totalWalk)} <span className="estimate">{route.real ? '실제 길' : '추정치'}</span>
         </span>
       </div>
       <div className="summary-item">

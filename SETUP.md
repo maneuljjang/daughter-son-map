@@ -26,6 +26,13 @@
 (선택) 올릴 때마다 자동 배포하고 싶으면, `gh auth refresh -h github.com -s workflow`로 권한을 추가한 뒤
 GitHub Actions 워크플로를 다시 넣으면 돼요 (git 기록의 첫 커밋에 `.github/workflows/deploy.yml`이 있어요).
 
+## C-2. (선택) 실제 걷는 길 — TMAP 키
+1. https://openapi.sk.com 가입 → 앱 만들기 → **TMAP** API 사용 신청 (무료 사용량 안에서)
+2. 앱의 **appKey** 를 `.env` 의 `VITE_TMAP_KEY=` 뒤에 붙여 넣기
+3. `npm run dev` 다시 켜기 → 코스 요약의 "추정치"가 "실제 길"로 바뀌면 성공
+4. `npm run deploy` 로 배포
+- 같은 구간은 기기마다 한 번만 불러오고 저장해 둬요. 키가 없거나 막히면 자동으로 추정치로 돌아가요.
+
 ## D. 자료 (성과공유회 11/19 전까지)
 - [ ] 장소 사진: `public/places/<id>.jpg` (목록은 public/places/README.md). 직접 찍은 사진만 써 주세요.
 - [ ] 한성대입구역 6번 출구 실제 좌표로 고치기 → `src/data/places.js`의 `STATION`

@@ -1,5 +1,8 @@
 import { Fragment, useMemo, useState } from 'react'
-import { getPlace, CATEGORIES, kakaoMapLink } from '../data/places.js'
+import { getPlace, CATEGORIES, kakaoMapLink, STATION } from '../data/places.js'
+import { useWalkPaths, useRestrooms } from '../lib/useRouteExtras.js'
+import WeatherBox from '../components/route/WeatherBox.jsx'
+import FontSizeButtons from './FontSizeButtons.jsx'
 import { buildSchedule, fmtTime, formatWhen } from '../lib/schedule.js'
 import { START_GUIDE, BUS } from '../data/transit.js'
 import { buildRoute, routePath, formatKm, formatMin } from '../lib/route.js'
@@ -16,7 +19,9 @@ export default function InviteApp() {
   const params = useMemo(() => readParams(), [])
   const { ids, inviteId, date, time, from } = params
   const stops = useMemo(() => ids.map(getPlace), [ids])
-  const route = useMemo(() => buildRoute(stops), [stops])
+  const paths = useWalkPaths(stops)
+  const route = useMemo(() => buildRoute(stops, STATION, paths), [stops, paths])
+  const restrooms = useRestrooms(stops)
   const path = useMemo(() => routePath(route), [route])
   const schedule = useMemo(() => buildSchedule(route, time), [route, time])
   const [votes, setVotes] = useState(() => getVotes(inviteId))
@@ -50,6 +55,7 @@ export default function InviteApp() {
   return (
     <div className="app invite">
       {/* 표지 */}
+      <FontSizeButtons />
       <header className="iv-cover">
         <p className="iv-from">💌 {from ? `${from}${josa(from, '이', '가')} 보낸 초대장` : '딸, 아들이 보낸 초대장'}</p>
         <h1 className="title iv-headline riso-shadow">
@@ -60,6 +66,7 @@ export default function InviteApp() {
           <span className="iv-hl">여기 가요</span>
         </h1>
         {(date || time) && <p className="iv-when">📅 {formatWhen(date, time)}</p>}
+        <WeatherBox date={date} time={time} large />
         <p className="iv-place-line">
           {stops.map((p, i) => (
             <Fragment key={p.id}>
@@ -83,8 +90,8 @@ export default function InviteApp() {
       {/* 지도 */}
       <section className="iv-section">
         <h2 className="title iv-h2">코스 지도</h2>
-        <KakaoMap className="iv-map" stops={stops} path={path} showStation={route.finalLeg?.walkable} fitKey={ids.join(',')} />
-        <p className="iv-note">숫자 순서대로 걸어요. 높은 곳에서 낮은 곳으로 내려오는 길이에요.</p>
+        <KakaoMap className="iv-map" stops={stops} path={path} restrooms={restrooms.all} showStation={route.finalLeg?.walkable} fitKey={ids.join(',')} />
+        <p className="iv-note">숫자 순서대로 걸어요. 높은 곳에서 낮은 곳으로 내려오는 길이에요.{restrooms.all.length > 0 && ' 🚻 표시는 화장실이에요.'}</p>
       </section>
 
       {/* 장소 카드 */}
@@ -110,6 +117,12 @@ export default function InviteApp() {
                 <PlaceImage place={p} />
                 <p className="iv-desc">{p.desc}</p>
                 <dl className="iv-dl">
+                  <dt>🚻 화장실</dt>
+                  <dd>
+                    {restrooms.byStop[p.id]
+                      ? `${restrooms.byStop[p.id].name} · 약 ${Math.max(10, Math.round(restrooms.byStop[p.id].meters / 10) * 10)}m`
+                      : '근처 공중화장실 정보가 없어요. 식당·카페에서 이용하세요.'}
+                  </dd>
                   <dt>🪑 쉬는 곳</dt>
                   <dd>{p.rest || (p.custom ? '카카오맵에서 확인해 주세요' : '쉬는 곳 정보는 확인 중이에요')}</dd>
                   {(p.notice || p.hill) && (
@@ -139,7 +152,7 @@ export default function InviteApp() {
 
       <section className="iv-section iv-foot">
         <p>
-          걷는 길은 모두 합쳐 약 <b>{formatKm(route.totalWalk)}</b>, <b>{formatMin(route.totalMinutes)}</b> 정도예요 (추정치).
+          걷는 길은 모두 합쳐 약 <b>{formatKm(route.totalWalk)}</b>, <b>{formatMin(route.totalMinutes)}</b> 정도예요{route.real ? ' (실제 길 기준)' : ' (추정치)'}.
           <br />
           힘드시면 언제든 마을버스 {BUS}를 타면 돼요.
         </p>

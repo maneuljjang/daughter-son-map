@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { getPlace, registerPlaces } from '../data/places.js'
 import { sortDownhill, buildRoute, insertIndex } from '../lib/route.js'
 import { readParams } from '../lib/url.js'
+import { useWalkPaths } from '../lib/useRouteExtras.js'
+import { STATION } from '../data/places.js'
 
 const DRAFT_KEY = 'dsm.draft'
 const EMPTY_PARENT = { swap: [], like: [] }
@@ -48,7 +50,8 @@ export function useCourse() {
   const { ids, mode } = state
 
   const stops = useMemo(() => ids.map(getPlace).filter(Boolean), [ids])
-  const route = useMemo(() => buildRoute(stops), [stops])
+  const paths = useWalkPaths(stops) // 실제 걷는 길 (TMAP 키가 있을 때)
+  const route = useMemo(() => buildRoute(stops, STATION, paths), [stops, paths])
 
   useEffect(() => {
     const { fromReply, ...rest } = state

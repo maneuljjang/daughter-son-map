@@ -28,6 +28,7 @@ export default function KakaoMap({
   selectedId,
   flagged = [],
   showStation = false,
+  restrooms = [],
   onSelect,
   fitKey,
   className = '',
@@ -124,10 +125,20 @@ export default function KakaoMap({
       }, 5),
     )
 
+    restrooms.forEach((r) => {
+      const ov = new maps.CustomOverlay({
+        position: new maps.LatLng(r.lat, r.lng),
+        content: `<div class="pin-wc" title="화장실">🚻</div>`,
+        zIndex: 1,
+      })
+      ov.setMap(map)
+      drawn.current.push(ov)
+    })
+
     if (showStation) {
       add(STATION, { label: '한성대입구역', text: '역', color: '#4A3A30', classes: 'pin-station' }, 4)
     }
-  }, [status, stops, candidates, path, selectedId, flagged, showStation, onSelect])
+  }, [status, stops, candidates, path, selectedId, flagged, showStation, onSelect, restrooms])
 
   // 범위 맞추기
   useEffect(() => {
