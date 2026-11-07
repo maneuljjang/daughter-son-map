@@ -13,13 +13,14 @@ import PlaceSheet from './screens/PlaceSheet.jsx'
 import CourseSheet from './screens/CourseSheet.jsx'
 import SwapSheet from './screens/SwapSheet.jsx'
 import PreviewSheet from './screens/PreviewSheet.jsx'
+import HelpSheet from './screens/HelpSheet.jsx'
 
 export default function ChildApp() {
   const course = useCourse()
   const { ids, stops, route, parent, inviteId } = course
   const [tab, setTab] = useState('food')
   const [selected, setSelected] = useState(null) // 장소 객체 (검색 결과일 수도 있음)
-  const [sheet, setSheet] = useState(course.fromReply ? 'course' : null) // null | 'course' | 'preview'
+  const [sheet, setSheet] = useState(course.fromReply ? 'course' : null) // null | 'course' | 'preview' | 'help'
   const [swapId, setSwapId] = useState(null)
   const [remoteVotes, setRemoteVotes] = useState({})
   const [query, setQuery] = useState('')
@@ -104,7 +105,7 @@ export default function ChildApp() {
           <h1 className="title riso-shadow c-logo">딸, 아들 어디가</h1>
           <p className="c-tag">성북동 · 부모님 모시고 오기 좋은 동네</p>
         </div>
-        <a className="c-stamp" href="#how">도움말</a>
+        <button className="c-stamp" onClick={() => setSheet('help')}>도움말</button>
       </header>
 
       {hardIds.length > 0 && (
@@ -222,19 +223,6 @@ export default function ChildApp() {
         )}
       </section>
 
-      <section className="c-section how" id="how">
-        <h2 className="title c-h2">이렇게 써요</h2>
-        <ol>
-          <li>추천 장소를 담거나, 카카오맵에서 찾아 담거나, 추천 코스를 불러와요.</li>
-          <li>앱이 <b>높은 곳에서 낮은 곳으로</b> 걷는 순서를 짜 줘요. 시작 지점까지는 성북02 버스나 택시로 올라가요.</li>
-          <li>날짜·시간을 넣으면 장소별 도착 시각과 쉬는 날을 알려 줘요.</li>
-          <li>[초대장 보내기]로 부모님께 카톡을 보내요. 부모님이 "여기는 힘들 것 같아"를 누르면 답장이 와요.</li>
-        </ol>
-        <p className="small muted">
-          거리·시간은 실제 걷는 길(TMAP)로 계산하고, 길을 못 불러오면 직선 거리 × 1.3 추정치로 보여 줘요. 카카오맵에서 넣은 장소의 높이는 고도 데이터로 추정해요. 운영 정보는 방문 전에 꼭 확인해 주세요.
-        </p>
-      </section>
-
       <div className="c-bar">
         {ids.length ? (
           <button className="c-bar-btn" onClick={() => setSheet('course')}>
@@ -280,6 +268,8 @@ export default function ChildApp() {
       {sheet === 'preview' && (
         <PreviewSheet course={course} showToast={showToast} onBack={() => setSheet('course')} onClose={() => setSheet(null)} />
       )}
+
+      {sheet === 'help' && <HelpSheet onClose={() => setSheet(null)} />}
 
       {toast}
     </div>
