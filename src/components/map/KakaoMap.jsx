@@ -65,10 +65,20 @@ export default function KakaoMap({
     }
   }, [])
 
-  // 크기가 바뀌면 지도 다시 그리기
+  // 크기가 바뀌면 지도 다시 그리고 범위도 다시 맞추기
+  // (화면이 숨겨져 있거나 글꼴이 늦게 떠서 처음 크기가 작았을 때 지도가 너무 멀리 보이는 문제 방지)
+  const fitRef = useRef(null)
   useEffect(() => {
     if (status !== 'ready') return
-    const ro = new ResizeObserver(() => mapRef.current?.relayout())
+    let last = ''
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect
+      const size = `${Math.round(width)}x${Math.round(height)}`
+      if (size === last || !width || !height) return
+      last = size
+      mapRef.current?.relayout()
+      fitRef.current?.()
+    })
     ro.observe(boxRef.current)
     return () => ro.disconnect()
   }, [status])
@@ -146,10 +156,13 @@ export default function KakaoMap({
     const maps = window.kakao.maps
     const pts = stops.length ? stops : candidates
     if (!pts.length) return
-    const bounds = new maps.LatLngBounds()
-    pts.forEach((p) => bounds.extend(new maps.LatLng(p.lat, p.lng)))
-    if (showStation && stops.length) bounds.extend(new maps.LatLng(STATION.lat, STATION.lng))
-    mapRef.current.setBounds(bounds, 40, 30, 40, 30)
+    fitRef.current = () => {
+      const bounds = new maps.LatLngBounds()
+      pts.forEach((p) => bounds.extend(new maps.LatLng(p.lat, p.lng)))
+      if (showStation && stops.length) bounds.extend(new maps.LatLng(STATION.lat, STATION.lng))
+      mapRef.current.setBounds(bounds, 40, 30, 40, 30)
+    }
+    fitRef.current()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, fitKey])
 

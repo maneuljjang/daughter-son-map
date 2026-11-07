@@ -95,7 +95,7 @@ describe('성북동 범위', () => {
 })
 
 import { adviceOf, describeCode, daysFromToday } from './weather.js'
-import { parseTmap } from './walkRoute.js'
+import { parseTmap, fresh, MAX_AGE_MS } from './walkRoute.js'
 import { legKey } from './walkRoute.js'
 import { pointAlong } from './geo.js'
 import { routePath, walkSteps } from './route.js'
@@ -129,6 +129,12 @@ describe('실제 걷는 길', () => {
     expect(w.meters).toBe(420)
     expect(w.coords).toHaveLength(3)
     expect(parseTmap({})).toBeNull()
+  })
+  it('저장한 경로는 24시간 안에만 다시 씀 (TMAP 약관)', () => {
+    const now = Date.now()
+    expect(fresh({ at: now - 60 * 60 * 1000 }, now)).toBe(true)
+    expect(fresh({ at: now - MAX_AGE_MS - 1 }, now)).toBe(false)
+    expect(fresh({ meters: 1 }, now)).toBe(false)
   })
   it('길 위의 지점', () => {
     const mid = pointAlong([{ lat: 0, lng: 0 }, { lat: 0, lng: 1 }, { lat: 0, lng: 2 }], 0.5)
