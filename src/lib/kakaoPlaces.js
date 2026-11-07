@@ -55,8 +55,37 @@ function run(fn, first, options) {
   })
 }
 
-// 성북동(성북동1가 포함) 주소만 남겨요. 근처 명륜동·혜화동·삼선동 등은 빼요.
-export const isSeongbukdong = (doc) => /성북구 성북동/.test(doc.address_name || '')
+// 행정동 '성북동'에 속하는 법정동만 남겨요. (한성대입구역도 법정동으로는 동소문동1가예요)
+// 근처 동소문동2가, 삼선동, 종로구 명륜동·혜화동 등은 빼요.
+export const SEONGBUK_LEGAL_DONGS = ['성북동', '성북동1가', '동소문동1가', '동소문동4가']
+
+/** 지번 주소 '서울 성북구 동소문동1가 12-3' → '동소문동1가' */
+export function legalDongOf(address = '') {
+  const parts = address.trim().split(/\s+/)
+  const gu = parts.indexOf('성북구')
+  return gu >= 0 ? parts[gu + 1] || '' : ''
+}
+
+export const isSeongbukdong = (doc) => SEONGBUK_LEGAL_DONGS.includes(legalDongOf(doc.address_name))
+
+/** 경계에 걸친 곳은 주소와 좌표의 동이 다를 수 있어, 좌표로 한 번 더 확인 (우리 추천 장소는 그대로) */
+async function insideByCoord(maps, places) {
+  const geo = new maps.services.Geocoder()
+  const ok = await Promise.all(
+    places.map(
+      (p) =>
+        !p.custom ||
+        new Promise((resolve) =>
+          geo.coord2RegionCode(p.lng, p.lat, (r, status) => {
+            if (status !== maps.services.Status.OK) return resolve(true) // 확인이 안 되면 주소 기준을 믿음
+            const b = r.find((x) => x.region_type === 'B')
+            resolve(b?.region_2depth_name === '성북구' && SEONGBUK_LEGAL_DONGS.includes(b.region_3depth_name))
+          }),
+        ),
+    ),
+  )
+  return places.filter((_, i) => ok[i])
+}
 const PAGES = [1, 2, 3] // 카카오는 한 번에 15곳까지라 3쪽(최대 45곳)을 받아서 거른 뒤 보여 줘요
 const MAX_RESULTS = 20
 
@@ -70,7 +99,8 @@ export async function searchKeyword(keyword, center = SEONGBUK_CENTER) {
   const c = clampCenter(center)
   const opts = (page) => ({ location: new maps.LatLng(c.lat, c.lng), radius: 2000, size: 15, page })
   const pages = await Promise.all(PAGES.map((page) => run(ps.keywordSearch.bind(ps), keyword, opts(page))))
-  return dedupe(pages.flat().filter(isSeongbukdong).map(toPlace)).slice(0, MAX_RESULTS)
+  const places = dedupe(pages.flat().filter(isSeongbukdong).map(toPlace))
+  return (await insideByCoord(maps, places)).slice(0, MAX_RESULTS)
 }
 
 /** 카테고리로 주변 장소 (지도 가운데 기준 가까운 순, 성북동 안만) */
@@ -85,7 +115,8 @@ export async function searchNearby(cat, center = SEONGBUK_CENTER) {
   )
   const docs = (await Promise.all(calls)).flat().filter(isSeongbukdong)
   const places = dedupe(docs.map(toPlace)).map((p) => (p.custom ? { ...p, cat } : p))
-  return places.sort((a, b) => distance(c, a) - distance(c, b)).slice(0, MAX_RESULTS)
+  const inside = await insideByCoord(maps, places)
+  return inside.sort((a, b) => distance(c, a) - distance(c, b)).slice(0, MAX_RESULTS)
 }
 
 function dedupe(list) {

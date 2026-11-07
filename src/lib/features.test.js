@@ -4,6 +4,7 @@ import { buildRoute, insertIndex, sortDownhill } from './route.js'
 import { buildSchedule, scheduleWarnings, weekdayOf, formatWhen, fmtTime } from './schedule.js'
 import { encodeCustom, decodeCustom } from './customCodec.js'
 import { rankFromElevation, rankFromNeighbors } from './altitude.js'
+import { isSeongbukdong, legalDongOf } from './kakaoPlaces.js'
 
 const P = (ids) => ids.map(getPlace)
 
@@ -73,5 +74,22 @@ describe('insertIndex', () => {
     expect(insertIndex(stops, PLACES.gilsang)).toBe(0) // 1 → 맨 앞
     expect(insertIndex(stops, PLACES.kansong)).toBe(2) // 4 → 5 앞
     expect(insertIndex(stops, PLACES.chapeau)).toBe(3) // 5 → 맨 뒤
+  })
+})
+
+describe('성북동 범위', () => {
+  const doc = (address_name) => ({ address_name })
+  it('행정동 성북동의 법정동 4곳만 통과', () => {
+    for (const a of ['서울 성북구 성북동 330-115', '서울 성북구 성북동1가 35-2', '서울 성북구 동소문동1가 20', '서울 성북구 동소문동4가 1-1']) {
+      expect(isSeongbukdong(doc(a))).toBe(true)
+    }
+  })
+  it('근처 다른 동은 빠짐', () => {
+    for (const a of ['서울 성북구 동소문동2가 1', '서울 성북구 삼선동1가 3', '서울 성북구 동선동1가 9', '서울 종로구 명륜3가 1', '서울 종로구 혜화동 5', '서울 성북구 성북동2가 1', '']) {
+      expect(isSeongbukdong(doc(a))).toBe(false)
+    }
+  })
+  it('법정동 이름 뽑기', () => {
+    expect(legalDongOf('서울 성북구 동소문동1가 20')).toBe('동소문동1가')
   })
 })
