@@ -1,0 +1,56 @@
+/* 요약 */
+.summary { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: stretch; }
+.summary-item {
+  display: flex; flex-direction: column; justify-content: center; gap: 2px;
+  padding: 8px 12px; border: var(--line); border-radius: 14px; background: var(--paper);
+}
+.summary-item:last-child { align-items: center; }
+.summary-k { font-size: 12px; color: var(--brown-soft); font-weight: 500; }
+.summary-v { font-weight: 900; font-size: 17px; }
+.summary-lg .summary-k { font-size: 15px; }
+.summary-lg .summary-v { font-size: 21px; }
+.summary-lg .level { font-size: 22px; }
+
+/* 구간 */
+.segment { display: flex; gap: 10px; padding: 2px 0 2px 14px; }
+.segment-line { width: 0; border-left: 3px dotted var(--brown); margin: 2px 0; flex: none; }
+.segment-body { padding: 8px 0; font-size: 14px; line-height: 1.55; }
+.segment-bus { color: var(--teal); font-weight: 700; }
+.segment-final .segment-body { font-weight: 700; }
+
+/* 안내 상자 */
+.notice-box {
+  border: var(--line); border-radius: 14px; padding: 12px 14px;
+  background: var(--butter); font-size: 14.5px; line-height: 1.6;
+}
+.notice-box b { font-weight: 900; }
+.notice-box.warn { background: var(--pink); }
+
+/* 미리 걸어보기 (전체 화면) */
+.rv { position: fixed; inset: 0; z-index: 70; background: var(--brown); display: flex; flex-direction: column; }
+.rv-view { position: relative; flex: 1; min-height: 0; }
+.rv-canvas { position: absolute; inset: 0; }
+.rv-msg {
+  position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
+  color: var(--cream); font-size: 19px; line-height: 1.6; padding: 24px;
+  background: rgba(74, 58, 48, 0.82); pointer-events: none;
+}
+.rv-close { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; z-index: 3; width: 52px; height: 52px; font-size: 22px; }
+.rv-mini {
+  position: absolute; left: 12px; bottom: 12px; z-index: 3;
+  width: 120px; height: 120px; border: var(--line); border-radius: 14px; overflow: hidden; background: #e9e2cc;
+}
+.rv-me { width: 16px; height: 16px; border-radius: 50%; background: var(--tomato); border: 3px solid #fff; box-shadow: 0 0 0 2px var(--brown); }
+.rv-panel {
+  background: var(--cream); border-top: var(--line); border-radius: 22px 22px 0 0;
+  padding: 14px 18px calc(16px + var(--safe-bottom)); margin-top: -18px; position: relative; z-index: 4;
+}
+.rv-progress { display: flex; gap: 3px; margin-bottom: 12px; }
+.rv-dot { flex: 1; height: 6px; border-radius: 3px; background: rgba(74, 58, 48, 0.15); }
+.rv-dot-stop { flex: 1.6; }
+.rv-dot.on { background: var(--brown); }
+.rv-tag { display: inline-block; color: #fff; font-weight: 700; font-size: 15px; padding: 3px 12px; border-radius: 999px; border: 2px solid var(--brown); }
+.rv-title { font-size: 28px; margin: 8px 0 4px; }
+.rv-sub { margin: 0 0 14px; font-size: 18px; line-height: 1.55; min-height: 2.9em; }
+.rv-controls { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; margin-bottom: 10px; }
+.btn-lg { min-height: 60px; font-size: 20px; }
