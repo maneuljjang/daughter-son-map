@@ -55,29 +55,37 @@ function run(fn, first, options) {
   })
 }
 
-/** 키워드 검색 (성북동 근처 2km 안) */
+// 성북동(성북동1가 포함) 주소만 남겨요. 근처 명륜동·혜화동·삼선동 등은 빼요.
+export const isSeongbukdong = (doc) => /성북구 성북동/.test(doc.address_name || '')
+const PAGES = [1, 2, 3] // 카카오는 한 번에 15곳까지라 3쪽(최대 45곳)을 받아서 거른 뒤 보여 줘요
+const MAX_RESULTS = 20
+
+/** 지도 가운데가 성북동에서 많이 벗어나 있으면 성북동 가운데를 기준으로 */
+const clampCenter = (c) => (distance(c, SEONGBUK_CENTER) > 1200 ? SEONGBUK_CENTER : c)
+
+/** 키워드 검색 (성북동 안만) */
 export async function searchKeyword(keyword, center = SEONGBUK_CENTER) {
   const maps = await loadKakaoMaps()
   const ps = new maps.services.Places()
-  const docs = await run(ps.keywordSearch.bind(ps), keyword, {
-    location: new maps.LatLng(center.lat, center.lng),
-    radius: 2000,
-    size: 15,
-  })
-  return dedupe(docs.map(toPlace))
+  const c = clampCenter(center)
+  const opts = (page) => ({ location: new maps.LatLng(c.lat, c.lng), radius: 2000, size: 15, page })
+  const pages = await Promise.all(PAGES.map((page) => run(ps.keywordSearch.bind(ps), keyword, opts(page))))
+  return dedupe(pages.flat().filter(isSeongbukdong).map(toPlace)).slice(0, MAX_RESULTS)
 }
 
-/** 카테고리로 주변 장소 (지도 가운데 기준 가까운 순) */
+/** 카테고리로 주변 장소 (지도 가운데 기준 가까운 순, 성북동 안만) */
 export async function searchNearby(cat, center = SEONGBUK_CENTER) {
   const maps = await loadKakaoMaps()
   const ps = new maps.services.Places()
+  const c = clampCenter(center)
   const q = CATEGORY_QUERY[cat]
-  const opts = { location: new maps.LatLng(center.lat, center.lng), radius: 1000, sort: maps.services.SortBy.DISTANCE, size: 15 }
-  const lists = q.keyword
-    ? [await run(ps.keywordSearch.bind(ps), q.keyword, opts)]
-    : await Promise.all(q.codes.map((code) => run(ps.categorySearch.bind(ps), code, opts)))
-  const places = dedupe(lists.flat().map(toPlace)).map((p) => (p.custom ? { ...p, cat } : p))
-  return places.sort((a, b) => distance(center, a) - distance(center, b)).slice(0, 15)
+  const opts = (page) => ({ location: new maps.LatLng(c.lat, c.lng), radius: 1200, sort: maps.services.SortBy.DISTANCE, size: 15, page })
+  const calls = (q.keyword ? [q.keyword] : q.codes).flatMap((key) =>
+    PAGES.map((page) => run((q.keyword ? ps.keywordSearch : ps.categorySearch).bind(ps), key, opts(page))),
+  )
+  const docs = (await Promise.all(calls)).flat().filter(isSeongbukdong)
+  const places = dedupe(docs.map(toPlace)).map((p) => (p.custom ? { ...p, cat } : p))
+  return places.sort((a, b) => distance(c, a) - distance(c, b)).slice(0, MAX_RESULTS)
 }
 
 function dedupe(list) {

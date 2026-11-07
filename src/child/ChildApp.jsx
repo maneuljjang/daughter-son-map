@@ -81,7 +81,7 @@ export default function ChildApp() {
     setResults({ title, items: [], loading: true })
     try {
       const items = await fn()
-      setResults({ title, items, loading: false, error: items.length ? null : '찾은 곳이 없어요. 다른 말로 찾아보세요.' })
+      setResults({ title, items, loading: false, error: items.length ? null : '성북동 안에서 찾은 곳이 없어요. 다른 말로 찾아보세요.' })
     } catch (e) {
       setResults({ title, items: [], loading: false, error: e.message === 'NO_KEY' ? '카카오 키가 없어요' : '카카오맵 검색을 하지 못했어요' })
     }
@@ -89,7 +89,7 @@ export default function ChildApp() {
   const onSearch = (e) => {
     e.preventDefault()
     const q = query.trim()
-    if (q) runSearch(`'${q}' 검색 결과`, () => searchKeyword(q, mapCenter()))
+    if (q) runSearch(`성북동 '${q}' 검색 결과`, () => searchKeyword(q, mapCenter()))
   }
   const onNearby = () => runSearch(`지도 근처 ${CATEGORIES[tab].label}`, () => searchNearby(tab, mapCenter()))
   const closeResults = () => {
@@ -154,7 +154,7 @@ export default function ChildApp() {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="카카오맵에서 찾기 (예: 칼국수, 서점)"
+            placeholder="성북동에서 찾기 (예: 칼국수, 서점)"
             enterKeyHint="search"
           />
           <button className="btn btn-dark btn-sm" type="submit">찾기</button>
