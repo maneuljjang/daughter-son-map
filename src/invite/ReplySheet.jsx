@@ -4,13 +4,14 @@ import { buildReplyText } from '../feedback/index.js'
 import { sendReply } from '../lib/kakaoShare.js'
 import { replyUrl } from '../lib/url.js'
 
-export default function ReplySheet({ ids, inviteId, votes, onClose }) {
+export default function ReplySheet({ ids, inviteId, votes, extra, onClose }) {
   const relevant = Object.fromEntries(Object.entries(votes).filter(([k]) => ids.includes(k)))
   const [text, setText] = useState(() => buildReplyText(relevant))
   const [msg, setMsg] = useState('')
   const url = replyUrl(ids, inviteId, {
     swap: ids.filter((id) => relevant[id] === 'hard'),
     like: ids.filter((id) => relevant[id] === 'like'),
+    ...extra,
   })
 
   const send = async () => {

@@ -5,6 +5,7 @@
 // - 운영 정보는 2026년 11월 기준이며, 방문 전 다시 확인이 필요합니다.
 // - rest: 앉아서 쉬는 곳 정보. 확인되지 않은 곳은 null 로 두고 화면에 "확인 중"으로 표시합니다.
 // - short: 답장 문구처럼 짧게 부를 때 쓰는 이름 (없으면 name)
+// - closed: 쉬는 요일 (0=일 … 6=토), hours: 영업시간, stay: 머무는 시간(분) — 날짜·시간을 넣으면 경고·시간표에 씁니다
 // - photo: public/places/<id>.jpg 가 있으면 자동으로 사진을 보여 줍니다. (팀이 직접 찍은 사진을 넣어 주세요)
 
 export const CATEGORIES = {
@@ -33,6 +34,7 @@ const list = [
     rest: '실내 좌석에서 성북동 전망을 보며 쉴 수 있어요.',
     tags: ['점심만 11~15시', '전망'],
     notice: '점심(11~15시)에만 영업해요.',
+    hours: { open: '11:00', close: '15:00' },
   },
   {
     id: 'ihyang', cat: 'food', name: '이향', addr: '성북로26길 13',
@@ -59,6 +61,7 @@ const list = [
     rest: '실내 좌식 자리와 마당 의자가 있어요.',
     tags: ['한옥 찻집', '대기 10~15분'],
     notice: '월·화요일은 쉬어요. 10~15분 기다릴 수 있어요.',
+    closed: [1, 2], // 월·화
   },
   {
     id: 'sbcafe', cat: 'cafe', name: '성북로 카페', addr: '성북로28길 10',
@@ -91,6 +94,7 @@ const list = [
     rest: null,
     tags: ['동네 빵집'],
     notice: '일요일은 쉬어요.',
+    closed: [0], // 일
   },
 
   // ── 즐길거리 ──────────────────────────
@@ -109,6 +113,7 @@ const list = [
     rest: null,
     tags: ['미술관'],
     notice: '월요일은 쉬어요.',
+    closed: [1], // 월
   },
   {
     id: 'choi', cat: 'fun', name: '최순우옛집', addr: '성북로15길 9',
@@ -117,6 +122,7 @@ const list = [
     rest: null,
     tags: ['한옥'],
     notice: '일·월요일은 쉬어요.',
+    closed: [0, 1], // 일·월
   },
   {
     id: 'seonjam', short: '선잠박물관', cat: 'fun', name: '성북선잠박물관·선잠단지', addr: '성북로 96',
@@ -133,6 +139,7 @@ const list = [
     rest: null,
     tags: ['예약제 투어', '화~토'],
     notice: '예약제 해설 투어로만 관람해요 (화~토).',
+    closed: [0, 1], stay: 60, // 화~토, 투어 1시간
   },
   {
     id: 'simujang', short: '심우장', cat: 'fun', name: '만해 한용운 심우장', addr: '성북로29길 24',
@@ -183,4 +190,20 @@ export const STATION = {
   approx: true,
 }
 
-export const getPlace = (id) => PLACES[id] || null
+// ── 카카오맵에서 검색해 넣은 장소 (id 가 'k' 로 시작) ─────────────
+// 기본 데이터에 없으므로 실행 중에 등록해 두고 같은 getPlace 로 찾습니다.
+const CUSTOM = {}
+
+export function registerPlaces(list) {
+  for (const p of list) {
+    if (!p?.id || PLACES[p.id]) continue
+    CUSTOM[p.id] = { hill: false, tags: [], rest: null, notice: null, ...p, custom: true }
+  }
+}
+
+export const getPlace = (id) => PLACES[id] || CUSTOM[id] || null
+export const isKnownId = (id) => Boolean(getPlace(id))
+
+/** 카카오맵 장소 페이지 (사진·영업시간·리뷰) */
+export const kakaoMapLink = (p) =>
+  p.kakaoUrl || `https://map.kakao.com/link/search/${encodeURIComponent(`성북동 ${p.name}`)}`

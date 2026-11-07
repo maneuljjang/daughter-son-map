@@ -25,19 +25,14 @@
 .c-section { margin-bottom: 22px; }
 .c-h2 { font-size: 21px; margin-bottom: 10px; }
 
-.course-row {
-  display: grid; grid-auto-flow: column; grid-auto-columns: 62%; gap: 10px;
-  overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 6px 8px 2px; margin: 0 -16px 0 0;
-  scrollbar-width: none;
-}
-.course-row::-webkit-scrollbar { display: none; }
+.course-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .course-card {
-  scroll-snap-align: start; text-align: left; display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+  text-align: left; display: flex; min-width: 0; flex-direction: column; align-items: flex-start; gap: 4px;
   padding: 12px 14px; border: var(--line); border-radius: var(--radius); background: var(--paper); box-shadow: var(--shadow-sm);
 }
 .course-card.on { background: var(--butter); }
 .course-emoji { font-size: 24px; }
-.course-title { font-family: var(--font-title); font-size: 19px; }
+.course-title { font-family: var(--font-title); font-size: 18px; }
 .course-sum { font-size: 13px; line-height: 1.45; color: var(--brown-soft); }
 
 .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
@@ -123,3 +118,36 @@
 .kakao-btn { margin: 0 12px 12px; padding: 9px; text-align: center; background: #f2f2f2; border-radius: 6px; font-size: 14px; color: #222; }
 .pv-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
 .pv-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+
+/* 카카오맵 검색 */
+.search { display: flex; gap: 8px; margin-bottom: 10px; }
+.search-input {
+  flex: 1; min-width: 0; min-height: 44px; padding: 8px 14px; border: var(--line); border-radius: 999px;
+  background: var(--paper); font-size: 15px;
+}
+.search-input:focus { outline: 3px solid var(--butter); }
+.results-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; font-size: 15px; }
+
+/* 날짜·시간 */
+.when { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.when-k { font-weight: 900; font-size: 15px; }
+.when input {
+  min-height: 40px; padding: 4px 10px; border: var(--line); border-radius: 12px; background: var(--paper); font-size: 15px;
+}
+.when-v { width: 100%; font-size: 14px; font-weight: 700; color: var(--teal); }
+
+/* 순서 바꾸기 */
+.cs-order { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: none; }
+.cs-move {
+  width: 32px; height: 22px; border: 2px solid var(--brown); border-radius: 8px; background: var(--paper);
+  font-size: 10px; line-height: 1; padding: 0;
+}
+.cs-move:disabled { opacity: 0.25; }
+.cs-time { color: var(--teal); }
+.cs-time.warn { color: var(--tomato); }
+
+/* 보내는 사람 */
+.from-field { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-weight: 900; font-size: 15px; }
+.from-field input {
+  flex: 1; min-width: 0; min-height: 44px; padding: 8px 14px; border: var(--line); border-radius: 12px; background: var(--paper);
+}

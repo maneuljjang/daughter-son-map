@@ -20,7 +20,7 @@ function injectScript(src) {
 export function loadKakaoMaps() {
   if (mapsPromise) return mapsPromise
   if (!KAKAO_KEY) return Promise.reject(new Error('NO_KEY'))
-  mapsPromise = injectScript(`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false`)
+  mapsPromise = injectScript(`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false&libraries=services`)
     .then(
       () =>
         new Promise((resolve, reject) => {

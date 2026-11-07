@@ -1,5 +1,5 @@
 import { distance, lerp } from './geo.js'
-import { PLACES, STATION } from '../data/places.js'
+import { PLACE_LIST, STATION, getPlace } from '../data/places.js'
 
 export const WALK_FACTOR = 1.3 // 직선 거리 × 1.3 = 추정 도보 거리
 export const SPEED_M_PER_MIN = 60 // 부모님 걸음 기준 (일반 성인 약 67m/분보다 느리게)
@@ -131,11 +131,20 @@ export function walkSteps(route) {
   return steps
 }
 
+/**
+ * 순서를 직접 정한 코스에 장소를 끼워 넣을 자리:
+ * 내리막이 깨지지 않도록, 새 장소보다 낮은 곳(alt 가 더 큰 곳) 바로 앞
+ */
+export function insertIndex(stops, place) {
+  const i = stops.findIndex((s) => s.alt > place.alt)
+  return i === -1 ? stops.length : i
+}
+
 /** 같은 종류의 다른 장소 (경사 없는 곳 먼저, 그다음 가까운 순) */
 export function alternativesFor(placeId, currentIds) {
-  const target = PLACES[placeId]
+  const target = getPlace(placeId)
   if (!target) return []
-  return Object.values(PLACES)
+  return PLACE_LIST
     .filter((p) => p.cat === target.cat && !currentIds.includes(p.id))
     .map((p) => ({ place: p, dist: distance(target, p) }))
     .sort((a, b) => Number(a.place.hill) - Number(b.place.hill) || a.dist - b.dist)

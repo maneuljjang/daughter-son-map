@@ -32,6 +32,7 @@ export default function KakaoMap({
   fitKey,
   className = '',
   style,
+  onReady,
 }) {
   const boxRef = useRef(null)
   const elRef = useRef(null)
@@ -50,6 +51,7 @@ export default function KakaoMap({
           level: 5,
         })
         mapRef.current.addControl(new maps.ZoomControl(), maps.ControlPosition.RIGHT)
+        onReady?.(mapRef.current)
         setStatus('ready')
       })
       .catch((e) => {

@@ -1,9 +1,10 @@
 import { Fragment, useMemo, useState } from 'react'
-import { PLACES, CATEGORIES } from '../data/places.js'
+import { getPlace, CATEGORIES, kakaoMapLink } from '../data/places.js'
+import { buildSchedule, fmtTime, formatWhen } from '../lib/schedule.js'
 import { START_GUIDE, BUS } from '../data/transit.js'
 import { buildRoute, routePath, formatKm, formatMin } from '../lib/route.js'
 import { readParams, asset } from '../lib/url.js'
-import { submitVote, getVotes } from '../feedback/index.js'
+import { submitVote, getVotes, josa } from '../feedback/index.js'
 import KakaoMap from '../components/map/KakaoMap.jsx'
 import PlaceImage from '../components/place/PlaceImage.jsx'
 import RouteSummary from '../components/route/RouteSummary.jsx'
@@ -13,10 +14,11 @@ import ReplySheet from './ReplySheet.jsx'
 
 export default function InviteApp() {
   const params = useMemo(() => readParams(), [])
-  const { ids, inviteId } = params
-  const stops = useMemo(() => ids.map((id) => PLACES[id]), [ids])
+  const { ids, inviteId, date, time, from } = params
+  const stops = useMemo(() => ids.map(getPlace), [ids])
   const route = useMemo(() => buildRoute(stops), [stops])
   const path = useMemo(() => routePath(route), [route])
+  const schedule = useMemo(() => buildSchedule(route, time), [route, time])
   const [votes, setVotes] = useState(() => getVotes(inviteId))
   const [walkFrom, setWalkFrom] = useState(undefined) // undefined: 닫힘, null: 처음부터, id: 그 장소부터
   const [replyOpen, setReplyOpen] = useState(false)
@@ -49,7 +51,7 @@ export default function InviteApp() {
     <div className="app invite">
       {/* 표지 */}
       <header className="iv-cover">
-        <p className="iv-from">💌 딸, 아들이 보낸 초대장</p>
+        <p className="iv-from">💌 {from ? `${from}${josa(from, '이', '가')} 보낸 초대장` : '딸, 아들이 보낸 초대장'}</p>
         <h1 className="title iv-headline riso-shadow">
           엄마, 아빠
           <br />
@@ -57,6 +59,7 @@ export default function InviteApp() {
           <br />
           <span className="iv-hl">여기 가요</span>
         </h1>
+        {(date || time) && <p className="iv-when">📅 {formatWhen(date, time)}</p>}
         <p className="iv-place-line">
           {stops.map((p, i) => (
             <Fragment key={p.id}>
@@ -99,11 +102,16 @@ export default function InviteApp() {
                     <h3 className="title iv-name">{p.name}</h3>
                   </div>
                 </div>
+                {schedule && (
+                  <p className="iv-time">
+                    🕛 {fmtTime(schedule[i].arrive)} 도착 · 약 {schedule[i].stay}분 머물러요
+                  </p>
+                )}
                 <PlaceImage place={p} />
                 <p className="iv-desc">{p.desc}</p>
                 <dl className="iv-dl">
                   <dt>🪑 쉬는 곳</dt>
-                  <dd>{p.rest || '쉬는 곳 정보는 확인 중이에요'}</dd>
+                  <dd>{p.rest || (p.custom ? '카카오맵에서 확인해 주세요' : '쉬는 곳 정보는 확인 중이에요')}</dd>
                   {(p.notice || p.hill) && (
                     <>
                       <dt>📌 알아두세요</dt>
@@ -112,6 +120,7 @@ export default function InviteApp() {
                   )}
                 </dl>
                 <button className="btn btn-block iv-peek" onClick={() => setWalkFrom(p.id)}>📷 이 장소 거리 미리 보기</button>
+                <a className="btn btn-block iv-peek" href={kakaoMapLink(p)} target="_blank" rel="noreferrer">🗺️ 카카오맵에서 사진·영업시간 보기</a>
                 <div className="iv-votes">
                   <button className={`iv-vote like ${votes[p.id] === 'like' ? 'on' : ''}`} onClick={() => vote(p.id, 'like')} aria-pressed={votes[p.id] === 'like'}>
                     👍 좋아요
@@ -144,7 +153,7 @@ export default function InviteApp() {
       </div>
 
       {walkFrom !== undefined && <RoadviewWalker route={route} startStopId={walkFrom} onClose={() => setWalkFrom(undefined)} />}
-      {replyOpen && <ReplySheet ids={ids} inviteId={inviteId} votes={votes} onClose={() => setReplyOpen(false)} />}
+      {replyOpen && <ReplySheet ids={ids} inviteId={inviteId} votes={votes} extra={{ date, time, from }} onClose={() => setReplyOpen(false)} />}
     </div>
   )
 }

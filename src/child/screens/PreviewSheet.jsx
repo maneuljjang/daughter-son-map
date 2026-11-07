@@ -3,17 +3,20 @@ import BottomSheet from '../../components/ui/BottomSheet.jsx'
 import { INVITE_TITLE, inviteSummary, sendInvite } from '../../lib/kakaoShare.js'
 import { inviteUrl, newInviteId, asset } from '../../lib/url.js'
 
-export default function PreviewSheet({ route, ids, inviteId, setInviteId, showToast, onBack, onClose }) {
+export default function PreviewSheet({ course, showToast, onBack, onClose }) {
+  const { route, ids, inviteId, date, time, from } = course
   // 보낼 때마다 새 초대장 id (2차 Firestore 에서 초대장별 의견을 구분)
   const [draftId] = useState(() => newInviteId())
-  const url = useMemo(() => inviteUrl(ids, draftId), [ids, draftId])
+  const extra = { date, time, from: from.trim() }
+  const url = useMemo(() => inviteUrl(ids, draftId, extra), [ids, draftId, date, time, from]) // eslint-disable-line react-hooks/exhaustive-deps
+  const summary = inviteSummary(route, extra)
   const [busy, setBusy] = useState(false)
 
   const send = async () => {
     setBusy(true)
     try {
-      await sendInvite({ route, url })
-      setInviteId(draftId)
+      await sendInvite({ route, url, extra })
+      course.setField('inviteId', draftId)
     } catch (e) {
       showToast(e.message === 'NO_KEY' ? '카카오 키가 없어요 (.env 확인)' : '카카오톡 공유를 열지 못했어요')
       console.error(e)
@@ -24,8 +27,8 @@ export default function PreviewSheet({ route, ids, inviteId, setInviteId, showTo
 
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(`${INVITE_TITLE}\n${inviteSummary(route)}\n${url}`)
-      setInviteId(draftId)
+      await navigator.clipboard.writeText(`${INVITE_TITLE}\n${summary}\n${url}`)
+      course.setField('inviteId', draftId)
       showToast('초대장 링크를 복사했어요')
     } catch {
       window.prompt('아래 링크를 길게 눌러 복사하세요', url)
@@ -34,12 +37,23 @@ export default function PreviewSheet({ route, ids, inviteId, setInviteId, showTo
 
   return (
     <BottomSheet title="초대장 미리보기" onClose={onClose}>
+      <label className="from-field">
+        <span>보내는 사람</span>
+        <input
+          type="text"
+          value={from}
+          maxLength={20}
+          placeholder="예: 첫째 딸 민지"
+          onChange={(e) => course.setField('from', e.target.value)}
+        />
+      </label>
+
       <div className="kakao-mock">
         <div className="kakao-bubble">
           <img src={asset('share/invite-card.png')} alt="" className="kakao-img" />
           <div className="kakao-body">
             <div className="kakao-title">{INVITE_TITLE}</div>
-            <div className="kakao-desc">{inviteSummary(route)}</div>
+            <div className="kakao-desc">{summary}</div>
           </div>
           <div className="kakao-btn">초대장 열기</div>
         </div>

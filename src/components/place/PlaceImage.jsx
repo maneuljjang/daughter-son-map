@@ -9,8 +9,8 @@ export default function PlaceImage({ place, className = '' }) {
   const color = CATEGORIES[place.cat]?.color
   return (
     <div className={`place-img ${className}`} style={{ color }}>
-      {!failed && <img src={asset(`places/${place.id}.jpg`)} alt={place.name} loading="lazy" onError={() => setFailed(true)} />}
-      {failed && (
+      {!failed && !place.custom && <img src={asset(`places/${place.id}.jpg`)} alt={place.name} loading="lazy" onError={() => setFailed(true)} />}
+      {(failed || place.custom) && (
         <div className="ph" aria-label={`${place.name} 사진 준비 중`}>
           <CategoryIcon cat={place.cat} size={64} />
         </div>

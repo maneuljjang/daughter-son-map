@@ -1,69 +1,84 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { PLACES } from '../data/places.js'
-import { sortDownhill, buildRoute } from '../lib/route.js'
+import { getPlace, registerPlaces } from '../data/places.js'
+import { sortDownhill, buildRoute, insertIndex } from '../lib/route.js'
 import { readParams } from '../lib/url.js'
 
 const DRAFT_KEY = 'dsm.draft'
+const EMPTY_PARENT = { swap: [], like: [] }
+const BASE = { ids: [], mode: 'auto', courseId: null, inviteId: null, parent: EMPTY_PARENT, date: '', time: '', from: '' }
 
 function loadInitial() {
+  let draft = null
+  try {
+    draft = JSON.parse(localStorage.getItem(DRAFT_KEY))
+    if (draft?.custom) registerPlaces(draft.custom)
+  } catch {
+    /* 무시 */
+  }
+
   const params = readParams()
   if (params.ids.length) {
     // 부모님 답장 링크로 들어온 경우: 보낸 순서 그대로
     return {
+      ...BASE,
+      from: draft?.from || params.from,
       ids: params.ids,
       mode: 'fixed',
-      courseId: null,
       inviteId: params.inviteId,
       parent: { swap: params.swap, like: params.like },
+      date: params.date,
+      time: params.time,
       fromReply: params.swap.length > 0 || params.like.length > 0,
     }
   }
-  try {
-    const d = JSON.parse(localStorage.getItem(DRAFT_KEY))
-    if (d?.ids) return { ...d, ids: d.ids.filter((id) => PLACES[id]), parent: d.parent || { swap: [], like: [] }, fromReply: false }
-  } catch {
-    /* 무시 */
+  if (draft?.ids) {
+    const { custom, ...rest } = draft
+    return { ...BASE, ...rest, ids: draft.ids.filter((id) => getPlace(id)), parent: draft.parent || EMPTY_PARENT, fromReply: false }
   }
-  return { ids: [], mode: 'auto', courseId: null, inviteId: null, parent: { swap: [], like: [] }, fromReply: false }
+  return { ...BASE, fromReply: false }
 }
 
 /**
  * 자녀 화면의 코스 상태
  * mode: 'auto'  = 직접 고른 코스, 항상 내리막 순서로 자동 정렬
- *       'fixed' = 추천 코스/답장으로 받은 코스, 순서를 그대로 둠
+ *       'fixed' = 추천 코스·답장으로 받은 코스·순서를 직접 바꾼 코스. 순서를 그대로 둠
  */
 export function useCourse() {
   const [state, setState] = useState(loadInitial)
   const { ids, mode } = state
 
+  const stops = useMemo(() => ids.map(getPlace).filter(Boolean), [ids])
+  const route = useMemo(() => buildRoute(stops), [stops])
+
   useEffect(() => {
     const { fromReply, ...rest } = state
     try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(rest))
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...rest, custom: stops.filter((p) => p.custom) }))
     } catch {
       /* 저장이 막힌 브라우저 */
     }
-  }, [state])
+  }, [state, stops])
 
   // 답장 링크 주소는 한 번 읽은 뒤 깔끔하게 정리 (새로고침해도 초안이 유지되도록)
   useEffect(() => {
     if (window.location.search) window.history.replaceState(null, '', window.location.pathname)
   }, [])
 
-  const stops = useMemo(() => ids.map((id) => PLACES[id]), [ids])
-  const route = useMemo(() => buildRoute(stops), [stops])
+  const sorted = (list) => sortDownhill(list.map(getPlace)).map((p) => p.id)
 
-  const sorted = (list) => sortDownhill(list.map((id) => PLACES[id])).map((p) => p.id)
-
-  /** 반환값: 순서를 다시 정했는지 */
-  const add = useCallback(
-    (id) => {
-      if (ids.includes(id)) return false
-      setState((s) => (s.ids.includes(id) ? s : { ...s, mode: 'auto', courseId: null, ids: sorted([...s.ids, id]) }))
-      return mode === 'fixed' && ids.length > 0
-    },
-    [ids, mode],
-  )
+  const add = useCallback((place) => {
+    registerPlaces([place])
+    setState((s) => {
+      if (s.ids.includes(place.id)) return s
+      if (s.mode === 'auto') return { ...s, ids: sorted([...s.ids, place.id]) }
+      // 순서를 정해 둔 코스: 내리막이 깨지지 않는 자리에 끼워 넣기
+      const list = s.ids.map(getPlace)
+      const at = insertIndex(list, getPlace(place.id))
+      const next = [...s.ids]
+      next.splice(at, 0, place.id)
+      return { ...s, ids: next }
+    })
+  }, [])
 
   const remove = useCallback((id) => {
     setState((s) => ({
@@ -73,9 +88,10 @@ export function useCourse() {
     }))
   }, [])
 
-  const swap = useCallback((oldId, newId) => {
+  const swap = useCallback((oldId, newPlace) => {
+    registerPlaces([newPlace])
     setState((s) => {
-      const replaced = s.ids.map((x) => (x === oldId ? newId : x))
+      const replaced = s.ids.map((x) => (x === oldId ? newPlace.id : x))
       return {
         ...s,
         ids: s.mode === 'auto' ? sorted(replaced) : replaced,
@@ -84,13 +100,25 @@ export function useCourse() {
     })
   }, [])
 
-  const loadCourse = useCallback((course) => {
-    setState((s) => ({ ...s, ids: [...course.stops], mode: 'fixed', courseId: course.id, parent: { swap: [], like: [] } }))
+  /** 위(-1)·아래(+1)로 한 칸 옮기기 → 이후로는 순서를 그대로 둠 */
+  const move = useCallback((id, dir) => {
+    setState((s) => {
+      const i = s.ids.indexOf(id)
+      const j = i + dir
+      if (i < 0 || j < 0 || j >= s.ids.length) return s
+      const next = [...s.ids]
+      ;[next[i], next[j]] = [next[j], next[i]]
+      return { ...s, ids: next, mode: 'fixed' }
+    })
   }, [])
 
-  const resort = useCallback(() => setState((s) => ({ ...s, mode: 'auto', courseId: null, ids: sorted(s.ids) })), [])
-  const clear = useCallback(() => setState((s) => ({ ...s, ids: [], mode: 'auto', courseId: null, parent: { swap: [], like: [] } })), [])
-  const setInviteId = useCallback((inviteId) => setState((s) => ({ ...s, inviteId })), [])
+  const loadCourse = useCallback((course) => {
+    setState((s) => ({ ...s, ids: [...course.stops], mode: 'fixed', courseId: course.id, parent: EMPTY_PARENT }))
+  }, [])
 
-  return { ...state, mode, stops, route, add, remove, swap, loadCourse, resort, clear, setInviteId }
+  const resort = useCallback(() => setState((s) => ({ ...s, mode: 'auto', ids: sorted(s.ids) })), [])
+  const clear = useCallback(() => setState((s) => ({ ...s, ids: [], mode: 'auto', courseId: null, parent: EMPTY_PARENT })), [])
+  const setField = useCallback((key, value) => setState((s) => ({ ...s, [key]: value })), [])
+
+  return { ...state, mode, stops, route, add, remove, swap, move, loadCourse, resort, clear, setField }
 }
