@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url'
 
 const r = (p) => fileURLToPath(new URL(p, import.meta.url))
 
-// Vercel 은 도메인 루트(/)에 올라가므로 기본값 '/' 그대로 씁니다.
-// 하위 경로에 올릴 때만 VITE_BASE=/<경로>/ 를 넣어 주세요.
+// GitHub Pages에서는 https://<아이디>.github.io/<저장소>/ 아래에 올라가므로
+// 배포할 때 VITE_BASE=/<저장소>/ 를 넣어 줍니다 (.github/workflows/deploy.yml 참고).
 export default defineConfig({
   base: process.env.VITE_BASE || '/',
   plugins: [react()],

@@ -45,8 +45,5 @@ public/
 ## 2차: Firestore 의견 저장
 `src/feedback/firestore.js` 맨 위 주석을 따라 하세요. 화면 코드는 `submitVote` / `subscribeVotes`만 쓰기 때문에 이 파일만 채우면 돼요.
 
-## 배포
-Vercel (비공개 GitHub 저장소 연결). 자세한 순서는 SETUP.md.
-
 ## 직접 해야 하는 설정
 [SETUP.md](SETUP.md) 참고.
