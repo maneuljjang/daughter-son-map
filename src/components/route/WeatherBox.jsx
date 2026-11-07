@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchWeather } from '../../lib/weather.js'
+import { fetchWeather, FORECAST_DAYS } from '../../lib/weather.js'
 
 /** 정한 날짜의 날씨 예보 (날짜가 없으면 아무것도 안 보여요) */
 export default function WeatherBox({ date, time, large = false }) {
@@ -15,7 +15,7 @@ export default function WeatherBox({ date, time, large = false }) {
 
   if (!date || !w || w.status === 'error' || w.status === 'past') return null
   if (w.status === 'far') {
-    return <div className={`weather ${large ? 'weather-lg' : ''} muted`}>🌤️ 날씨 예보는 {w.days}일 뒤부터 볼 수 있어요.</div>
+    return <div className={`weather ${large ? 'weather-lg' : ''} muted`}>🌤️ 날씨 예보는 나들이 {FORECAST_DAYS}일 전부터 볼 수 있어요.</div>
   }
   return (
     <div className={`weather ${large ? 'weather-lg' : ''}`}>

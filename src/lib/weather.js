@@ -1,7 +1,7 @@
 // 정한 날짜의 성북동 날씨 예보 (Open-Meteo, 무료·키 없음, 약 16일 앞까지)
 const LAT = 37.594
 const LNG = 126.997
-const FORECAST_DAYS = 15
+export const FORECAST_DAYS = 15 // 예보는 이만큼 앞까지만 나와요
 
 /** WMO 날씨 코드 → 말·이모지 */
 export function describeCode(code) {
