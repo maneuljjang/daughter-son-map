@@ -14,16 +14,17 @@
    - `.env`를 고친 뒤에는 dev 서버를 껐다가 다시 켜야 해요.
 
 ## C. GitHub Pages 배포
-1. GitHub에서 새 저장소를 만들어요 (예: `daughter-son-map`).
-2. 이 폴더를 그 저장소의 `main` 브랜치에 올려요.
-3. 저장소 **Settings → Pages → Build and deployment → Source**를 **GitHub Actions**로 바꿔요.
-4. 저장소 **Settings → Secrets and variables → Actions → New repository secret**
-   - Name: `VITE_KAKAO_JS_KEY`
-   - Secret: JavaScript 키
-5. **Actions** 탭에서 "Deploy to GitHub Pages"가 초록색으로 끝나면 `https://<아이디>.github.io/<저장소>/`로 접속돼요.
-6. 카카오 디벨로퍼스 → 플랫폼 키 → Default JS Key → JavaScript SDK 도메인에서 **+**를 누르고 `https://<아이디>.github.io`를 추가해요.
-   - 경로(`/<저장소>/`)는 빼고 도메인만 넣어요.
-   - 이 도메인이 없으면 배포한 사이트에서 지도와 카톡 공유가 모두 안 돼요.
+- 저장소: https://github.com/maneuljjang/daughter-son-map (공개)
+- 주소: https://maneuljjang.github.io/daughter-son-map/
+- 고친 뒤 다시 배포하기: 이 폴더에서 `npm run deploy`
+  (테스트 → 빌드 → `gh-pages` 브랜치로 올림. 1~2분 뒤 반영돼요)
+- 카카오 키는 내 컴퓨터의 `.env`에서 읽어요. 다른 컴퓨터에서 배포하려면 그 컴퓨터에도 `.env`가 있어야 해요.
+- 카카오에 `https://maneuljjang.github.io`를 등록해야 하는 곳 두 군데
+  - 플랫폼 키 → Default JS Key → **JavaScript SDK 도메인**
+  - **제품 링크 관리 → 웹 도메인**
+
+(선택) 올릴 때마다 자동 배포하고 싶으면, `gh auth refresh -h github.com -s workflow`로 권한을 추가한 뒤
+GitHub Actions 워크플로를 다시 넣으면 돼요 (git 기록의 첫 커밋에 `.github/workflows/deploy.yml`이 있어요).
 
 ## D. 자료 (성과공유회 11/19 전까지)
 - [ ] 장소 사진: `public/places/<id>.jpg` (목록은 public/places/README.md). 직접 찍은 사진만 써 주세요.
