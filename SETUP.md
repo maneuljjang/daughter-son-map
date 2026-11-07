@@ -13,17 +13,15 @@
 2. `npm run dev`를 실행하고 http://localhost:5173 열기
    - `.env`를 고친 뒤에는 dev 서버를 껐다가 다시 켜야 해요.
 
-## C. GitHub Pages 배포
-1. GitHub에서 새 저장소를 만들어요 (예: `daughter-son-map`).
-2. 이 폴더를 그 저장소의 `main` 브랜치에 올려요.
-3. 저장소 **Settings → Pages → Build and deployment → Source**를 **GitHub Actions**로 바꿔요.
-4. 저장소 **Settings → Secrets and variables → Actions → New repository secret**
-   - Name: `VITE_KAKAO_JS_KEY`
-   - Secret: JavaScript 키
-5. **Actions** 탭에서 "Deploy to GitHub Pages"가 초록색으로 끝나면 `https://<아이디>.github.io/<저장소>/`로 접속돼요.
-6. 카카오 디벨로퍼스 → 플랫폼 키 → Default JS Key → JavaScript SDK 도메인에서 **+**를 누르고 `https://<아이디>.github.io`를 추가해요.
-   - 경로(`/<저장소>/`)는 빼고 도메인만 넣어요.
-   - 이 도메인이 없으면 배포한 사이트에서 지도와 카톡 공유가 모두 안 돼요.
+## C. Vercel 배포 (비공개 GitHub 저장소)
+1. 코드는 비공개 저장소 `maneuljjang/daughter-son-map`에 있어요.
+2. Vercel → Add New → Project → GitHub 저장소 `daughter-son-map` → Import
+3. Environment Variables에 `VITE_KAKAO_JS_KEY` 추가 (값은 `.env` 파일의 키) → Deploy
+4. 배포 주소(예: `https://daughter-son-map.vercel.app`)를 카카오 두 곳에 등록
+   - 플랫폼 키 → Default JS Key → **JavaScript SDK 도메인** (지도·공유가 동작하려면)
+   - **제품 링크 관리 → 웹 도메인** (카톡 카드의 [초대장 열기] 링크가 열리려면)
+5. 이후 `main`에 올리면 Vercel이 자동으로 다시 배포해요.
+   - 키를 바꾸면 Vercel → Settings → Environment Variables에서 고친 뒤 Redeploy
 
 ## D. 자료 (성과공유회 11/19 전까지)
 - [ ] 장소 사진: `public/places/<id>.jpg` (목록은 public/places/README.md). 직접 찍은 사진만 써 주세요.
