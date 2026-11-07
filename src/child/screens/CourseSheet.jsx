@@ -64,30 +64,34 @@ export default function CourseSheet({ course, hardIds, likeIds, onRemove, onSwap
           return (
             <Fragment key={p.id}>
               <li className={`cs-stop ${hard ? 'hard' : ''}`}>
-                <span className="cs-order">
-                  <button className="cs-move" onClick={() => course.move(p.id, -1)} disabled={i === 0} aria-label={`${p.name} 위로`}>▲</button>
-                  <span className="cs-num" style={{ background: CATEGORIES[p.cat].color }}>{i + 1}</span>
-                  <button className="cs-move" onClick={() => course.move(p.id, 1)} disabled={i === stops.length - 1} aria-label={`${p.name} 아래로`}>▼</button>
-                </span>
-                <span className="cs-text">
-                  <span className="cs-name">
+                <span className="cs-num" style={{ background: CATEGORIES[p.cat].color }}>{i + 1}</span>
+                <div className="cs-text">
+                  <div className="cs-name">
                     {p.name} {p.hill && <span className="chip chip-hill">경사</span>}
-                  </span>
-                  <span className="small muted">
+                  </div>
+                  <div className="cs-meta">
                     {CATEGORIES[p.cat].label}
                     {p.custom && ' · 카카오맵'}
-                    {s && <b className={`cs-time ${warn ? 'warn' : ''}`}> · {fmtTime(s.arrive)} 도착 · {s.stay}분</b>}
-                  </span>
-                  <span className="cs-wc">
+                  </div>
+                  {s && (
+                    <div className={`cs-time ${warn ? 'warn' : ''}`}>
+                      🕛 {fmtTime(s.arrive)} 도착 · {s.stay}분
+                    </div>
+                  )}
+                  <div className="cs-wc">
                     🚻 {restrooms.byStop[p.id] ? `화장실 ${Math.max(10, Math.round(restrooms.byStop[p.id].meters / 10) * 10)}m` : '근처 화장실 정보 없음'}
-                  </span>
-                  {hard && <span className="cs-flag">😮‍💨 부모님: 여기는 힘들 것 같아요</span>}
-                  {like && <span className="cs-like">👍 부모님이 좋대요</span>}
-                </span>
-                <span className="cs-actions">
-                  <button className={`btn btn-sm ${hard ? 'btn-primary' : ''}`} onClick={() => onSwap(p.id)}>바꾸기</button>
-                  <button className="icon-btn" onClick={() => onRemove(p.id)} aria-label={`${p.name} 빼기`}>✕</button>
-                </span>
+                  </div>
+                  {hard && <div className="cs-flag">😮‍💨 부모님: 여기는 힘들 것 같아요</div>}
+                  {like && <div className="cs-like">👍 부모님이 좋대요</div>}
+                  <div className="cs-actions">
+                    <button className={`btn btn-sm ${hard ? 'btn-primary' : ''}`} onClick={() => onSwap(p.id)}>바꾸기</button>
+                    <button className="btn btn-sm" onClick={() => onRemove(p.id)}>빼기</button>
+                  </div>
+                </div>
+                <div className="cs-order">
+                  <button className="icon-btn" onClick={() => course.move(p.id, -1)} disabled={i === 0} aria-label={`${p.name} 위로`}>▲</button>
+                  <button className="icon-btn" onClick={() => course.move(p.id, 1)} disabled={i === stops.length - 1} aria-label={`${p.name} 아래로`}>▼</button>
+                </div>
               </li>
               {route.segments[i] && <SegmentInfo segment={route.segments[i]} />}
             </Fragment>
@@ -97,7 +101,7 @@ export default function CourseSheet({ course, hardIds, likeIds, onRemove, onSwap
       <FinalLegInfo finalLeg={route.finalLeg} />
 
       <div className="cs-foot">
-        <button className="btn btn-dark btn-block" onClick={onPreview}>
+        <button className="btn btn-dark btn-lg btn-block" onClick={onPreview}>
           💌 {hardIds.length ? '바꾼 코스로 ' : ''}초대장 보내기
         </button>
         <button className="btn btn-ghost btn-sm" onClick={course.clear}>코스 비우기</button>

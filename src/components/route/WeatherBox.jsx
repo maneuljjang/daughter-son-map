@@ -21,13 +21,18 @@ export default function WeatherBox({ date, time, large = false }) {
     <div className={`weather ${large ? 'weather-lg' : ''}`}>
       <div className="weather-main">
         <span className="weather-icon" aria-hidden="true">{w.icon}</span>
-        <span>
-          <b>{w.text}</b> · {w.tMin}° / {w.tMax}° · 비 올 확률 {w.rain}%
-        </span>
+        <div>
+          <b>
+            {w.text} · {w.tMin}°~{w.tMax}°
+          </b>
+          <div className="weather-sub">비 올 확률 {w.rain}%</div>
+        </div>
       </div>
-      {w.advice.map((t) => (
-        <div key={t} className="weather-tip">{t}</div>
-      ))}
+      <ul className="weather-tips">
+        {w.advice.map((t) => (
+          <li key={t}>{t}</li>
+        ))}
+      </ul>
     </div>
   )
 }

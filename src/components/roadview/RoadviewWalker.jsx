@@ -111,7 +111,7 @@ export default function RoadviewWalker({ route, startStopId, onClose }) {
         {status === 'loading' && <div className="rv-msg">로드뷰를 불러오는 중…</div>}
         {status === 'error' && <div className="rv-msg">로드뷰를 불러오지 못했어요.<br />인터넷 연결과 카카오 키 설정을 확인해 주세요.</div>}
         {status === 'ready' && noPano && <div className="rv-msg">이 지점은 로드뷰 사진이 없어요.<br />[다음]을 눌러 계속 걸어가요.</div>}
-        <button className="icon-btn rv-close" onClick={onClose} aria-label="닫기">✕</button>
+        <button className="btn rv-close" onClick={onClose}>✕ 닫기</button>
         <div ref={miniEl} className="rv-mini" aria-hidden="true" />
       </div>
 
@@ -129,7 +129,7 @@ export default function RoadviewWalker({ route, startStopId, onClose }) {
           <button className="btn btn-lg" onClick={() => go(-1)} disabled={index === 0}>◀ 이전</button>
           <button className="btn btn-lg btn-primary" onClick={() => go(1)} disabled={index === steps.length - 1}>다음 ▶</button>
         </div>
-        <button className="btn btn-ghost btn-block" onClick={() => setAuto((a) => !a)} disabled={index === steps.length - 1}>
+        <button className="btn btn-block" onClick={() => setAuto((a) => !a)} disabled={index === steps.length - 1}>
           {auto ? '⏸ 멈추기' : '▶ 자동으로 따라 걷기'}
         </button>
         <p className="small muted" style={{ textAlign: 'center', margin: '8px 0 0' }}>

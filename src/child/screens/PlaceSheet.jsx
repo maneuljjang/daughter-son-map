@@ -33,13 +33,15 @@ export default function PlaceSheet({ place, inCourse, busy, onToggle, onClose })
           </>
         )}
       </dl>
-      <a className="btn btn-sm btn-block" href={kakaoMapLink(place)} target="_blank" rel="noreferrer" style={{ marginBottom: 10 }}>
-        카카오맵에서 사진·영업시간 보기
-      </a>
       {!place.custom && <p className="small muted">운영 정보는 2026년 11월 기준이에요. 방문 전에 확인해 주세요.</p>}
-      <button className={`btn btn-block ${inCourse ? 'btn-dark' : 'btn-primary'}`} onClick={onToggle} disabled={busy}>
-        {busy ? '높이 알아보는 중…' : inCourse ? '코스에서 빼기' : '코스에 담기'}
-      </button>
+      <div className="ps-actions">
+        <button className={`btn btn-lg btn-block ${inCourse ? 'btn-dark' : 'btn-primary'}`} onClick={onToggle} disabled={busy}>
+          {busy ? '높이 알아보는 중…' : inCourse ? '코스에서 빼기' : '코스에 담기'}
+        </button>
+        <a className="btn btn-block" href={kakaoMapLink(place)} target="_blank" rel="noreferrer">
+          🗺️ 카카오맵에서 사진·영업시간 보기
+        </a>
+      </div>
     </BottomSheet>
   )
 }

@@ -1,37 +1,36 @@
 import { useEffect, useState } from 'react'
 
 const SIZES = [
-  { label: '가', scale: 1, name: '보통 글자' },
-  { label: '가+', scale: 1.15, name: '큰 글자' },
-  { label: '가++', scale: 1.3, name: '아주 큰 글자' },
+  { scale: 1, name: '보통' },
+  { scale: 1.15, name: '크게' },
+  { scale: 1.3, name: '아주 크게' },
 ]
 const KEY = 'dsm.fontScale'
 
-/** 부모님 화면 글자 크기 (이 휴대폰에 기억) */
+/** 부모님 화면 글자 크기: 누를 때마다 보통 → 크게 → 아주 크게 (이 휴대폰에 기억) */
 export default function FontSizeButtons() {
-  const [scale, setScale] = useState(() => {
+  const [i, setI] = useState(() => {
     try {
-      return Number(localStorage.getItem(KEY)) || 1
+      const saved = Number(localStorage.getItem(KEY))
+      return Math.max(0, SIZES.findIndex((s) => s.scale === saved))
     } catch {
-      return 1
+      return 0
     }
   })
+  const size = SIZES[i]
   useEffect(() => {
-    document.documentElement.style.setProperty('--fs', String(scale))
+    document.documentElement.style.setProperty('--fs', String(size.scale))
+    document.documentElement.dataset.fs = String(size.scale) // 글자가 커지면 버튼을 한 줄에 하나씩
     try {
-      localStorage.setItem(KEY, String(scale))
+      localStorage.setItem(KEY, String(size.scale))
     } catch {
       /* 무시 */
     }
-  }, [scale])
+  }, [size.scale])
 
   return (
-    <div className="fs-buttons" role="group" aria-label="글자 크기">
-      {SIZES.map((s) => (
-        <button key={s.scale} className={`fs-btn ${scale === s.scale ? 'on' : ''}`} onClick={() => setScale(s.scale)} aria-label={s.name} aria-pressed={scale === s.scale}>
-          {s.label}
-        </button>
-      ))}
-    </div>
+    <button className="btn btn-sm fs-toggle" onClick={() => setI((i + 1) % SIZES.length)} aria-label={`글자 크기 ${size.name}, 눌러서 바꾸기`}>
+      <span aria-hidden="true" className="fs-icon">가</span> 글자 {size.name}
+    </button>
   )
 }

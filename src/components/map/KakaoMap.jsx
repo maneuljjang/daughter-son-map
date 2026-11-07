@@ -34,6 +34,7 @@ export default function KakaoMap({
   className = '',
   style,
   onReady,
+  locked = false, // true: 손가락으로 끌거나 확대되지 않게 (페이지 스크롤이 지도에 걸리지 않도록). 확대는 +/− 버튼으로
 }) {
   const boxRef = useRef(null)
   const elRef = useRef(null)
@@ -52,6 +53,10 @@ export default function KakaoMap({
           level: 5,
         })
         mapRef.current.addControl(new maps.ZoomControl(), maps.ControlPosition.RIGHT)
+        if (locked) {
+          mapRef.current.setDraggable(false)
+          mapRef.current.setZoomable(false)
+        }
         onReady?.(mapRef.current)
         setStatus('ready')
       })

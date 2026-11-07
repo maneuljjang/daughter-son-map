@@ -55,7 +55,7 @@ export default function SwapSheet({ placeId, currentIds, onPick, onClose }) {
       </p>
       <ul className="place-list">{curated.map(row)}</ul>
       {kakao === null && (
-        <button className="btn btn-block btn-ghost" style={{ marginTop: 10 }} onClick={findMore}>
+        <button className="btn btn-block more-btn" onClick={findMore}>
           🗺️ 근처 {CATEGORIES[target.cat].label} 카카오맵에서 더 찾기
         </button>
       )}

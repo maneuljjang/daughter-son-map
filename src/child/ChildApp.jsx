@@ -104,7 +104,7 @@ export default function ChildApp() {
           <h1 className="title riso-shadow c-logo">딸, 아들 어디가</h1>
           <p className="c-tag">성북동 · 부모님 모시고 오기 좋은 동네</p>
         </div>
-        <a className="c-stamp" href="#how" aria-label="이용 방법">?</a>
+        <a className="c-stamp" href="#how">도움말</a>
       </header>
 
       {hardIds.length > 0 && (
@@ -180,7 +180,7 @@ export default function ChildApp() {
         {results && (
           <div className="results-head">
             <b>{results.title}</b>
-            <button className="btn btn-sm btn-ghost" onClick={closeResults}>← 추천 장소로</button>
+            <button className="btn btn-sm" onClick={closeResults}>← 추천 장소로</button>
           </div>
         )}
         {results?.loading && <p className="muted">찾는 중…</p>}
@@ -216,7 +216,7 @@ export default function ChildApp() {
           })}
         </ul>
         {!results && (
-          <button className="btn btn-block btn-ghost" style={{ marginTop: 10 }} onClick={onNearby}>
+          <button className="btn btn-block more-btn" onClick={onNearby}>
             🗺️ 지도 근처 {CATEGORIES[tab].label} 더 찾기 (카카오맵)
           </button>
         )}
@@ -238,9 +238,9 @@ export default function ChildApp() {
       <div className="c-bar">
         {ids.length ? (
           <button className="c-bar-btn" onClick={() => setSheet('course')}>
-            <span className="c-bar-count">{ids.length}</span>
+            <span className="c-bar-count" aria-label={`${ids.length}곳`}>{ids.length}</span>
             <span className="c-bar-text">
-              <b>내 코스</b> · {formatKm(route.totalWalk)} · 난이도 {route.difficulty}
+              <b>{formatKm(route.totalWalk)}</b> · 난이도 {route.difficulty}
               {hardIds.length > 0 && <span className="chip chip-hill" style={{ marginLeft: 6 }}>바꿀 곳 {hardIds.length}</span>}
             </span>
             <span className="c-bar-go">코스 보기 ▲</span>

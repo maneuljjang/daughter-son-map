@@ -8,7 +8,7 @@ export default function PlaceImage({ place, className = '' }) {
   const [failed, setFailed] = useState(false)
   const color = CATEGORIES[place.cat]?.color
   return (
-    <div className={`place-img ${className}`} style={{ color }}>
+    <div className={`place-img ${failed || place.custom ? 'is-ph' : ''} ${className}`} style={{ color }}>
       {!failed && !place.custom && <img src={asset(`places/${place.id}.jpg`)} alt={place.name} loading="lazy" onError={() => setFailed(true)} />}
       {(failed || place.custom) && (
         <div className="ph" aria-label={`${place.name} 사진 준비 중`}>
