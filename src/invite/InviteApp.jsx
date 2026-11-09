@@ -1,5 +1,6 @@
-import { Fragment, useMemo, useState } from 'react'
-import { getPlace, CATEGORIES, kakaoPhotoLink, STATION } from '../data/places.js'
+import { Fragment, useCallback, useMemo, useState } from 'react'
+import { getPlace, CATEGORIES, STATION } from '../data/places.js'
+import KakaoPhotoViewer from '../components/place/KakaoPhotoViewer.jsx'
 import PlaceDetails from '../components/place/PlaceDetails.jsx'
 import { useWalkPaths, useRestrooms } from '../lib/useRouteExtras.js'
 import WeatherBox from '../components/route/WeatherBox.jsx'
@@ -30,6 +31,8 @@ export default function InviteApp() {
   const [votes, setVotes] = useState(() => getVotes(inviteId))
   const [walkFrom, setWalkFrom] = useState(undefined) // undefined: 닫힘, null: 처음부터, id: 그 장소부터
   const [replyOpen, setReplyOpen] = useState(false)
+  const [photoOf, setPhotoOf] = useState(null)
+  const closePhoto = useCallback(() => setPhotoOf(null), [])
 
   if (!stops.length) {
     return (
@@ -170,9 +173,9 @@ export default function InviteApp() {
 
                   <div className="btn-row iv-actions">
                     <button className="btn" onClick={() => setWalkFrom(p.id)}>🚶 거리 보기</button>
-                    <a className="btn" href={kakaoPhotoLink(p)} target="_blank" rel="noreferrer">
+                    <button className="btn" onClick={() => setPhotoOf(p)}>
                       📷 {p.cat === 'food' ? '식당 사진' : p.cat === 'cafe' ? '가게 사진' : '사진 보기'}
-                    </a>
+                    </button>
                   </div>
 
                   <div className="btn-row iv-votes">
@@ -208,6 +211,7 @@ export default function InviteApp() {
       </div>
 
       {walkFrom !== undefined && <RoadviewWalker route={route} startStopId={walkFrom} onClose={() => setWalkFrom(undefined)} />}
+      {photoOf && <KakaoPhotoViewer place={photoOf} onClose={closePhoto} />}
       {replyOpen && <ReplySheet ids={ids} inviteId={inviteId} votes={votes} extra={{ date, time, from }} onClose={() => setReplyOpen(false)} />}
     </div>
   )

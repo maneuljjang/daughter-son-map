@@ -1,9 +1,13 @@
 import BottomSheet from '../../components/ui/BottomSheet.jsx'
 import PlaceImage from '../../components/place/PlaceImage.jsx'
-import { CATEGORIES, kakaoPhotoLink } from '../../data/places.js'
+import { useCallback, useState } from 'react'
+import { CATEGORIES } from '../../data/places.js'
+import KakaoPhotoViewer from '../../components/place/KakaoPhotoViewer.jsx'
 import PlaceDetails from '../../components/place/PlaceDetails.jsx'
 
 export default function PlaceSheet({ place, inCourse, busy, onToggle, onClose }) {
+  const [photos, setPhotos] = useState(false)
+  const closePhotos = useCallback(() => setPhotos(false), [])
   return (
     <BottomSheet title={place.name} onClose={onClose}>
       <PlaceImage place={place} />
@@ -57,10 +61,11 @@ export default function PlaceSheet({ place, inCourse, busy, onToggle, onClose })
         <button className={`btn btn-lg btn-block ${inCourse ? 'btn-dark' : 'btn-primary'}`} onClick={onToggle} disabled={busy}>
           {busy ? '높이 알아보는 중…' : inCourse ? '코스에서 빼기' : '코스에 담기'}
         </button>
-        <a className="btn btn-block" href={kakaoPhotoLink(place)} target="_blank" rel="noreferrer">
-          📷 카카오맵에서 사진 보기
-        </a>
+        <button className="btn btn-block" onClick={() => setPhotos(true)}>
+          📷 카카오맵 사진 보기
+        </button>
       </div>
+      {photos && <KakaoPhotoViewer place={place} onClose={closePhotos} />}
     </BottomSheet>
   )
 }
