@@ -1,6 +1,7 @@
 import BottomSheet from '../../components/ui/BottomSheet.jsx'
 import PlaceImage from '../../components/place/PlaceImage.jsx'
-import { CATEGORIES, kakaoMapLink } from '../../data/places.js'
+import { CATEGORIES, kakaoPhotoLink } from '../../data/places.js'
+import PlaceDetails from '../../components/place/PlaceDetails.jsx'
 
 export default function PlaceSheet({ place, inCourse, busy, onToggle, onClose }) {
   return (
@@ -14,7 +15,7 @@ export default function PlaceSheet({ place, inCourse, busy, onToggle, onClose })
           <span key={t} className="chip">{t}</span>
         ))}
       </div>
-      <p className="ps-desc">{place.desc}</p>
+      {place.about ? <PlaceDetails place={place} /> : <p className="ps-desc">{place.desc}</p>}
       <dl className="ps-dl">
         <dt>주소</dt>
         <dd>{place.addr}</dd>
@@ -22,6 +23,24 @@ export default function PlaceSheet({ place, inCourse, busy, onToggle, onClose })
           <>
             <dt>전화</dt>
             <dd><a href={`tel:${place.phone}`}>{place.phone}</a></dd>
+          </>
+        )}
+        {place.hoursText && (
+          <>
+            <dt>여는 시간</dt>
+            <dd>{place.hoursText}</dd>
+          </>
+        )}
+        {place.fee && (
+          <>
+            <dt>입장료</dt>
+            <dd>{place.fee}</dd>
+          </>
+        )}
+        {place.parking && (
+          <>
+            <dt>주차</dt>
+            <dd>{place.parking}</dd>
           </>
         )}
         <dt>쉬는 곳</dt>
@@ -38,8 +57,8 @@ export default function PlaceSheet({ place, inCourse, busy, onToggle, onClose })
         <button className={`btn btn-lg btn-block ${inCourse ? 'btn-dark' : 'btn-primary'}`} onClick={onToggle} disabled={busy}>
           {busy ? '높이 알아보는 중…' : inCourse ? '코스에서 빼기' : '코스에 담기'}
         </button>
-        <a className="btn btn-block" href={kakaoMapLink(place)} target="_blank" rel="noreferrer">
-          🗺️ 카카오맵에서 사진·영업시간 보기
+        <a className="btn btn-block" href={kakaoPhotoLink(place)} target="_blank" rel="noreferrer">
+          📷 카카오맵에서 사진 보기
         </a>
       </div>
     </BottomSheet>

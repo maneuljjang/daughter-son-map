@@ -8,6 +8,8 @@
 // - closed: 쉬는 요일 (0=일 … 6=토), hours: 영업시간, stay: 머무는 시간(분) — 날짜·시간을 넣으면 경고·시간표에 씁니다
 // - photo: public/places/<id>.jpg 가 있으면 자동으로 사진을 보여 줍니다. (팀이 직접 찍은 사진을 넣어 주세요)
 
+import { PLACE_DETAILS } from './placeDetails.js'
+
 export const CATEGORIES = {
   food: { label: '밥', short: '밥', color: 'var(--c-food)' },
   cafe: { label: '카페·디저트', short: '카페', color: 'var(--c-cafe)' },
@@ -177,7 +179,7 @@ const list = [
   },
 ]
 
-export const PLACES = Object.fromEntries(list.map((p) => [p.id, { hill: false, ...p }]))
+export const PLACES = Object.fromEntries(list.map((p) => [p.id, { hill: false, ...p, ...PLACE_DETAILS[p.id] }]))
 export const PLACE_LIST = list.map((p) => PLACES[p.id])
 
 // 출발·도착 지점 (좌표는 대략값 — 실제 좌표로 보정 필요)
@@ -206,4 +208,11 @@ export const isKnownId = (id) => Boolean(getPlace(id))
 
 /** 카카오맵 장소 페이지 (사진·영업시간·리뷰) */
 export const kakaoMapLink = (p) =>
-  p.kakaoUrl || `https://map.kakao.com/link/search/${encodeURIComponent(`성북동 ${p.name}`)}`
+  p.kakaoUrl ||
+  (p.kakaoId ? `https://place.map.kakao.com/${p.kakaoId}` : `https://map.kakao.com/link/search/${encodeURIComponent(`성북동 ${p.name}`)}`)
+
+/** 카카오맵 장소의 사진 탭 (장소 번호를 모르면 장소 페이지) */
+export const kakaoPhotoLink = (p) => {
+  const link = kakaoMapLink(p)
+  return link.startsWith('https://place.map.kakao.com/') ? `${link}#photoview` : link
+}

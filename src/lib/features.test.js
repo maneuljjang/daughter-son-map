@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { PLACES, getPlace, registerPlaces } from '../data/places.js'
+import { PLACES, getPlace, registerPlaces, kakaoPhotoLink } from '../data/places.js'
 import { buildRoute, insertIndex, sortDownhill } from './route.js'
 import { buildSchedule, scheduleWarnings, weekdayOf, formatWhen, fmtTime } from './schedule.js'
 import { encodeCustom, decodeCustom } from './customCodec.js'
@@ -156,5 +156,29 @@ describe('실제 걷는 길', () => {
     expect(routePath(real).length).toBe(1 + 2 + 1 + 1 + 1)
     const pathStep = walkSteps(real).find((s) => s.kind === 'path')
     expect(pathStep.pos.lat).toBeLessThan(37.5932) // 직선이 아니라 길 위 지점
+  })
+})
+
+describe('장소 자세한 설명', () => {
+  const all = Object.values(PLACES)
+  it('모든 추천 장소에 설명과 카카오맵 번호가 있다', () => {
+    for (const p of all) {
+      expect(p.about, p.id).toBeTruthy()
+      expect(p.kakaoId, p.id).toBeGreaterThan(0)
+    }
+  })
+  it('밥·카페에는 메뉴, 즐길거리·산책에는 볼 것이 있다', () => {
+    for (const p of all) {
+      if (p.cat === 'food' || p.cat === 'cafe') expect(p.menu?.length, p.id).toBeGreaterThan(0)
+      else expect(p.points?.length, p.id).toBeGreaterThan(0)
+    }
+  })
+  it('사진 버튼은 카카오맵 사진 탭으로 간다', () => {
+    expect(kakaoPhotoLink(PLACES.guk)).toBe('https://place.map.kakao.com/8215478#photoview')
+    expect(kakaoPhotoLink({ name: '가게', kakaoUrl: 'https://place.map.kakao.com/99' })).toBe('https://place.map.kakao.com/99#photoview')
+  })
+  it('국화정원은 수요일에 쉬는 걸로 경고한다', () => {
+    const route = buildRoute(P(['guk']))
+    expect(scheduleWarnings(route, '2026-11-18', null).map((w) => w.text).join()).toContain('수요일')
   })
 })

@@ -78,3 +78,17 @@
 .rv-title { font-size: 28px; margin: 8px 0 4px; }
 .rv-sub { margin: 0 0 16px; font-size: 18px; line-height: 1.55; min-height: 2.9em; }
 .rv-controls { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; margin-bottom: 10px; }
+
+/* ── 장소 자세한 설명 ─────────────────────────── */
+.pd { margin: 14px 0; }
+.pd-about { margin: 0 0 12px; font-size: 1em; line-height: 1.7; }
+.pd-box { padding: 12px 14px; border: var(--line-thin); border-radius: 12px; background: var(--paper); }
+.pd-box + .pd-box { margin-top: 10px; }
+.pd-title { font-weight: 900; margin-bottom: 6px; }
+.pd-menu { list-style: none; margin: 0; padding: 0; }
+.pd-menu li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 5px 0; }
+.pd-menu li + li { border-top: 1px dashed var(--line-soft); }
+.pd-menu b { flex: none; font-weight: 700; }
+.pd-note { margin: 6px 0 0; font-size: 0.8em; color: var(--brown-soft); }
+.pd-points { margin: 0; padding-left: 1.2em; }
+.pd-points li + li { margin-top: 4px; }

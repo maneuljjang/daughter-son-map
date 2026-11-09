@@ -1,5 +1,6 @@
 import { Fragment, useMemo, useState } from 'react'
-import { getPlace, CATEGORIES, kakaoMapLink, STATION } from '../data/places.js'
+import { getPlace, CATEGORIES, kakaoPhotoLink, STATION } from '../data/places.js'
+import PlaceDetails from '../components/place/PlaceDetails.jsx'
 import { useWalkPaths, useRestrooms } from '../lib/useRouteExtras.js'
 import WeatherBox from '../components/route/WeatherBox.jsx'
 import FontSizeButtons from './FontSizeButtons.jsx'
@@ -130,9 +131,27 @@ export default function InviteApp() {
                   </div>
 
                   <PlaceImage place={p} />
-                  <p className="iv-desc">{p.desc}</p>
+                  {p.about ? <PlaceDetails place={p} /> : <p className="iv-desc">{p.desc}</p>}
 
                   <dl className="iv-info">
+                    {p.hoursText && (
+                      <div>
+                        <dt>🕘 여는 시간</dt>
+                        <dd>{p.hoursText}</dd>
+                      </div>
+                    )}
+                    {p.fee && (
+                      <div>
+                        <dt>🎫 입장료</dt>
+                        <dd>{p.fee}</dd>
+                      </div>
+                    )}
+                    {p.parking && (
+                      <div>
+                        <dt>🚗 주차</dt>
+                        <dd>{p.parking}</dd>
+                      </div>
+                    )}
                     <div>
                       <dt>🚻 화장실</dt>
                       <dd>{wc ? `${wc.name} · ${roundM(wc.meters)}m` : '근처 정보가 없어요. 식당·카페에서 이용하세요.'}</dd>
@@ -150,8 +169,10 @@ export default function InviteApp() {
                   </dl>
 
                   <div className="btn-row iv-actions">
-                    <button className="btn" onClick={() => setWalkFrom(p.id)}>📷 거리 보기</button>
-                    <a className="btn" href={kakaoMapLink(p)} target="_blank" rel="noreferrer">🗺️ 카카오맵</a>
+                    <button className="btn" onClick={() => setWalkFrom(p.id)}>🚶 거리 보기</button>
+                    <a className="btn" href={kakaoPhotoLink(p)} target="_blank" rel="noreferrer">
+                      📷 {p.cat === 'food' ? '식당 사진' : p.cat === 'cafe' ? '가게 사진' : '사진 보기'}
+                    </a>
                   </div>
 
                   <div className="btn-row iv-votes">
