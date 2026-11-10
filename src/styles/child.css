@@ -215,3 +215,13 @@
 }
 .help-steps li > b { font-size: 16px; }
 .help-note { margin: 0 0 16px; line-height: 1.6; }
+
+/* 부모님께 가격 숨기기 */
+.price-toggle {
+  display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; padding: 12px 14px;
+  border: 1px solid var(--border); border-radius: 12px; cursor: pointer;
+}
+.price-toggle input { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--primary); flex: none; }
+.price-toggle-text { display: flex; flex-direction: column; gap: 2px; font-size: 14px; color: var(--text-2); }
+.price-toggle-text b { font-size: 15px; color: var(--text); }
+.price-toggle-note { margin: 0 0 14px; padding: 10px 12px; border-radius: 10px; background: var(--warn-soft); color: var(--warn); font-size: 13px; line-height: 1.55; }

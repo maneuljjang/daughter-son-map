@@ -26,12 +26,13 @@ export function readParams(search = window.location.search) {
     date: /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : '',
     time: /^\d{2}:\d{2}$/.test(time) ? time : '',
     from: (q.get('f') || '').slice(0, 20),
+    hidePrice: q.get('hp') === '1', // 자녀가 '부모님께 가격 숨기기'를 켰는지
   }
 }
 
 const appRoot = () => `${window.location.origin}${BASE}`
 
-function courseQuery(ids, inviteId, { date, time, from } = {}) {
+function courseQuery(ids, inviteId, { date, time, from, hidePrice } = {}) {
   const q = new URLSearchParams({ r: ids.join(',') })
   const custom = ids.map(getPlace).filter((p) => p?.custom)
   if (custom.length) q.set('c', encodeCustom(custom))
@@ -39,6 +40,7 @@ function courseQuery(ids, inviteId, { date, time, from } = {}) {
   if (date) q.set('d', date)
   if (time) q.set('t', time)
   if (from) q.set('f', from)
+  if (hidePrice) q.set('hp', '1')
   return q
 }
 const pretty = (q) => q.toString().replace(/%2C/g, ',').replace(/%3A/g, ':')

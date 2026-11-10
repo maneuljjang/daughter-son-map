@@ -2,6 +2,7 @@ import { Fragment, useCallback, useMemo, useState } from 'react'
 import { getPlace, CATEGORIES, STATION } from '../data/places.js'
 import KakaoPhotoViewer from '../components/place/KakaoPhotoViewer.jsx'
 import PlaceDetails from '../components/place/PlaceDetails.jsx'
+import { stripPrice } from '../lib/price.js'
 import { useWalkPaths, useRestrooms } from '../lib/useRouteExtras.js'
 import WeatherBox from '../components/route/WeatherBox.jsx'
 import FontSizeButtons from './FontSizeButtons.jsx'
@@ -21,7 +22,7 @@ const roundM = (m) => Math.max(10, Math.round(m / 10) * 10)
 
 export default function InviteApp() {
   const params = useMemo(() => readParams(), [])
-  const { ids, inviteId, date, time, from } = params
+  const { ids, inviteId, date, time, from, hidePrice } = params
   const stops = useMemo(() => ids.map(getPlace), [ids])
   const paths = useWalkPaths(stops)
   const route = useMemo(() => buildRoute(stops, STATION, paths), [stops, paths])
@@ -150,7 +151,7 @@ export default function InviteApp() {
                   </div>
 
                   <PlaceImage place={p} />
-                  <p className="iv-desc">{p.desc}</p>
+                  <p className="iv-desc">{hidePrice ? stripPrice(p.desc) : p.desc}</p>
                   {p.hill && <p className="iv-hill">⛰️ 경사나 계단이 있어요</p>}
 
                   <div className="btn-row iv-actions">
@@ -163,7 +164,7 @@ export default function InviteApp() {
                   {/* 메뉴·여는 시간·화장실 같은 자세한 정보는 접어 두기 */}
                   <details className="iv-more">
                     <summary>자세히 보기</summary>
-                    {p.about && <PlaceDetails place={p} />}
+                    {p.about && <PlaceDetails place={p} hidePrice={hidePrice} />}
                     <dl className="iv-info">
                       {p.hoursText && (
                         <div>
@@ -180,7 +181,7 @@ export default function InviteApp() {
                       {p.parking && (
                         <div>
                           <dt>🚗 주차</dt>
-                          <dd>{p.parking}</dd>
+                          <dd>{hidePrice ? stripPrice(p.parking) : p.parking}</dd>
                         </div>
                       )}
                       <div>
@@ -245,7 +246,7 @@ export default function InviteApp() {
 
       {walkFrom !== undefined && <RoadviewWalker route={route} startStopId={walkFrom} onClose={() => setWalkFrom(undefined)} />}
       {photoOf && <KakaoPhotoViewer place={photoOf} onClose={closePhoto} />}
-      {replyOpen && <ReplySheet ids={ids} inviteId={inviteId} votes={votes} extra={{ date, time, from }} onClose={() => setReplyOpen(false)} />}
+      {replyOpen && <ReplySheet ids={ids} inviteId={inviteId} votes={votes} extra={{ date, time, from, hidePrice }} onClose={() => setReplyOpen(false)} />}
     </div>
   )
 }

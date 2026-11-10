@@ -7,7 +7,7 @@ import { STATION } from '../data/places.js'
 
 const DRAFT_KEY = 'dsm.draft'
 const EMPTY_PARENT = { swap: [], like: [] }
-const BASE = { ids: [], mode: 'auto', courseId: null, inviteId: null, parent: EMPTY_PARENT, date: '', time: '', from: '' }
+const BASE = { ids: [], mode: 'auto', courseId: null, inviteId: null, parent: EMPTY_PARENT, date: '', time: '', from: '', hidePrice: false }
 
 function loadInitial() {
   let draft = null
@@ -29,6 +29,7 @@ function loadInitial() {
       inviteId: params.inviteId,
       parent: { swap: params.swap, like: params.like },
       date: params.date,
+      hidePrice: params.hidePrice,
       time: params.time,
       fromReply: params.swap.length > 0 || params.like.length > 0,
     }

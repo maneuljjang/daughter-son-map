@@ -182,3 +182,18 @@ describe('장소 자세한 설명', () => {
     expect(scheduleWarnings(route, '2026-11-18', null).map((w) => w.text).join()).toContain('수요일')
   })
 })
+
+import { stripPrice } from './price.js'
+import { readParams } from './url.js'
+
+describe('부모님께 가격 숨기기', () => {
+  it('설명 속 가격을 지운다', () => {
+    expect(stripPrice('루프탑에서 전망을 보며 먹는 양식. 1인 17,000~45,000원.')).toBe('루프탑에서 전망을 보며 먹는 양식.')
+    expect(stripPrice('바스크 치즈케이크가 인기예요. 9,100원')).toBe('바스크 치즈케이크가 인기예요.')
+    expect(stripPrice('가격 없는 설명')).toBe('가격 없는 설명')
+  })
+  it('초대장 주소의 hp=1 을 읽는다', () => {
+    expect(readParams('?r=guk&hp=1').hidePrice).toBe(true)
+    expect(readParams('?r=guk').hidePrice).toBe(false)
+  })
+})

@@ -4,11 +4,11 @@ import { INVITE_TITLE, inviteSummary, sendInvite } from '../../lib/kakaoShare.js
 import { inviteUrl, newInviteId, asset } from '../../lib/url.js'
 
 export default function PreviewSheet({ course, showToast, onBack, onClose }) {
-  const { route, ids, inviteId, date, time, from } = course
+  const { route, ids, inviteId, date, time, from, hidePrice } = course
   // 보낼 때마다 새 초대장 id (2차 Firestore 에서 초대장별 의견을 구분)
   const [draftId] = useState(() => newInviteId())
-  const extra = { date, time, from: from.trim() }
-  const url = useMemo(() => inviteUrl(ids, draftId, extra), [ids, draftId, date, time, from]) // eslint-disable-line react-hooks/exhaustive-deps
+  const extra = { date, time, from: from.trim(), hidePrice }
+  const url = useMemo(() => inviteUrl(ids, draftId, extra), [ids, draftId, date, time, from, hidePrice]) // eslint-disable-line react-hooks/exhaustive-deps
   const summary = inviteSummary(route, extra)
   const [busy, setBusy] = useState(false)
 
@@ -47,6 +47,19 @@ export default function PreviewSheet({ course, showToast, onBack, onClose }) {
           onChange={(e) => course.setField('from', e.target.value)}
         />
       </label>
+
+      <label className="price-toggle">
+        <input type="checkbox" checked={hidePrice} onChange={(e) => course.setField('hidePrice', e.target.checked)} />
+        <span className="price-toggle-text">
+          <b>부모님께 가격 숨기기</b>
+          <span>초대장에서 메뉴 가격을 빼고 보여 드려요.</span>
+        </span>
+      </label>
+      {hidePrice && (
+        <p className="price-toggle-note">
+          ⚠️ [식당 사진] 버튼으로 여는 카카오맵 화면에는 메뉴판 사진이나 가격이 보일 수 있어요.
+        </p>
+      )}
 
       <div className="kakao-mock">
         <div className="kakao-bubble">
