@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "deploy": "npm test && bash scripts/deploy.sh"
+    "deploy": "npm test && bash scripts/deploy.sh",
+    "deploy:preview": "npm test && bash scripts/deploy-preview.sh"
   },
   "dependencies": {
     "react": "^18.3.1",
