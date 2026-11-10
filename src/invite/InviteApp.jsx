@@ -111,9 +111,20 @@ export default function InviteApp() {
       </section>
 
       {/* 장소 카드 */}
-      <section className="iv-section">
-        <h2 className="title iv-h2">갈 곳 {stops.length}곳</h2>
-        <p className="iv-note">마음에 드시면 [좋아요], 힘드실 것 같으면 [힘들 것 같아요]를 눌러 주세요.</p>
+      <section className="iv-section iv-pick">
+        <div className="iv-pick-head">
+          <span className="iv-pick-step">부모님 차례예요</span>
+          <h2 className="title iv-h2">장소마다 골라 주세요</h2>
+          <p className="iv-note">마음에 드시면 [좋아요], 힘드실 것 같으면 [힘들 것 같아요]를 눌러 주세요.</p>
+          <div className="iv-progress" aria-label={`${stops.length}곳 중 ${voteCount}곳 골랐어요`}>
+            <div className="iv-progress-text">
+              <b>{stops.length}곳 중 {voteCount}곳</b> 골랐어요
+            </div>
+            <div className="iv-progress-bar">
+              <span style={{ width: `${(voteCount / stops.length) * 100}%` }} />
+            </div>
+          </div>
+        </div>
         <ol className="iv-list">
           {stops.map((p, i) => {
             const wc = restrooms.byStop[p.id]
@@ -121,7 +132,12 @@ export default function InviteApp() {
             const notice = [p.hill && '경사나 계단이 있어요.', p.notice].filter(Boolean).join(' ')
             return (
               <Fragment key={p.id}>
-                <li className="iv-card card">
+                <li className={`iv-card card ${votes[p.id] ? `voted-${votes[p.id]}` : ''}`}>
+                  {votes[p.id] && (
+                    <div className={`iv-status ${votes[p.id]}`}>
+                      {votes[p.id] === 'like' ? '👍 좋아요 했어요' : '😮‍💨 힘들 것 같다고 했어요'}
+                    </div>
+                  )}
                   <div className="iv-card-head">
                     <span className="iv-num" style={{ background: CATEGORIES[p.cat].color }}>{i + 1}</span>
                     <div className="iv-card-title">
@@ -136,15 +152,6 @@ export default function InviteApp() {
                   <PlaceImage place={p} />
                   <p className="iv-desc">{p.desc}</p>
                   {p.hill && <p className="iv-hill">⛰️ 경사나 계단이 있어요</p>}
-
-                  <div className="btn-row iv-votes">
-                    <button className={`iv-vote like ${votes[p.id] === 'like' ? 'on' : ''}`} onClick={() => vote(p.id, 'like')} aria-pressed={votes[p.id] === 'like'}>
-                      <span aria-hidden="true">👍</span> 좋아요
-                    </button>
-                    <button className={`iv-vote hard ${votes[p.id] === 'hard' ? 'on' : ''}`} onClick={() => vote(p.id, 'hard')} aria-pressed={votes[p.id] === 'hard'}>
-                      <span aria-hidden="true">😮‍💨</span> 힘들 것 같아요
-                    </button>
-                  </div>
 
                   <div className="btn-row iv-actions">
                     <button className="btn" onClick={() => setWalkFrom(p.id)}>🚶 거리 보기</button>
@@ -192,6 +199,19 @@ export default function InviteApp() {
                       )}
                     </dl>
                   </details>
+
+                  {/* 고르는 부분: 질문과 버튼을 한 묶음으로 */}
+                  <div className="iv-ask">
+                    <p className="iv-ask-q">이곳 어떠세요?</p>
+                    <div className="btn-row iv-votes">
+                      <button className={`iv-vote like ${votes[p.id] === 'like' ? 'on' : ''}`} onClick={() => vote(p.id, 'like')} aria-pressed={votes[p.id] === 'like'}>
+                        <span aria-hidden="true">👍</span> 좋아요
+                      </button>
+                      <button className={`iv-vote hard ${votes[p.id] === 'hard' ? 'on' : ''}`} onClick={() => vote(p.id, 'hard')} aria-pressed={votes[p.id] === 'hard'}>
+                        <span aria-hidden="true">😮‍💨</span> 힘들 것 같아요
+                      </button>
+                    </div>
+                  </div>
                 </li>
                 {route.segments[i] && <SegmentInfo segment={route.segments[i]} />}
               </Fragment>
@@ -211,8 +231,15 @@ export default function InviteApp() {
       </section>
 
       <div className="iv-bar">
+        <p className="iv-bar-status">
+          {voteCount === 0
+            ? '장소를 골라 주시면 의견을 보낼 수 있어요'
+            : voteCount < stops.length
+              ? `${voteCount}곳 골랐어요 · ${stops.length - voteCount}곳 남았어요`
+              : '다 골랐어요! 의견을 보내 주세요'}
+        </p>
         <button className="btn btn-primary btn-lg btn-block btn-lift" onClick={() => setReplyOpen(true)}>
-          💬 의견 보내기{voteCount ? ` (${voteCount}곳 골랐어요)` : ''}
+          💬 의견 보내기
         </button>
       </div>
 
