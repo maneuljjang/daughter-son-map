@@ -8,6 +8,10 @@ const r = (p) => fileURLToPath(new URL(p, import.meta.url))
 // 배포할 때 VITE_BASE=/<저장소>/ 를 넣어 줍니다 (scripts/deploy.sh 가 알아서 넣어요).
 
 // 링크를 그냥 붙여 넣었을 때 보이는 미리보기(오픈그래프). 배포할 때 VITE_SITE_URL 을 넣어 줍니다.
+// 카카오톡은 링크 미리보기 이미지를 오래 저장해 둬요. 카드 이미지를 바꾸면 이 숫자를 올려 주세요
+// (src/lib/kakaoShare.js 의 SHARE_IMAGE_VERSION 과 같게).
+const SHARE_IMAGE_VERSION = 2
+
 const ogTags = () => ({
   name: 'og-tags',
   transformIndexHtml(html, ctx) {
@@ -19,7 +23,7 @@ const ogTags = () => ({
       `<meta property="og:type" content="website" />`,
       `<meta property="og:title" content="${title}" />`,
       `<meta property="og:description" content="${desc}" />`,
-      site && `<meta property="og:image" content="${site}/share/invite-card.png" />`,
+      site && `<meta property="og:image" content="${site}/share/invite-card.png?v=${SHARE_IMAGE_VERSION}" />`,
       site && `<meta property="og:url" content="${site}/${isInvite ? 'invite/' : ''}" />`,
     ].filter(Boolean)
     return html.replace('</head>', tags.map((t) => `    ${t}`).join('\n') + '\n  </head>')

@@ -5,7 +5,10 @@ import { formatWhen } from './schedule.js'
 
 export const INVITE_TITLE = '엄마, 아빠 이번에 올라오시면 여기 가요'
 
-const shareImage = () => import.meta.env.VITE_SHARE_IMAGE_URL || absoluteAsset('share/invite-card.png')
+// 카카오톡은 카드 이미지를 오래 저장해 둬요. 이미지를 바꾸면 숫자를 올려 주세요 (vite.config.js 와 같게).
+export const SHARE_IMAGE_VERSION = 2
+const shareImage = () =>
+  import.meta.env.VITE_SHARE_IMAGE_URL || `${absoluteAsset('share/invite-card.png')}?v=${SHARE_IMAGE_VERSION}`
 
 /** 카드 설명 문구 (카톡 피드 설명은 짧을수록 잘 보여요) */
 export function inviteSummary(route, { date, time, from } = {}) {
