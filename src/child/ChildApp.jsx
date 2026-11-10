@@ -131,97 +131,101 @@ export default function ChildApp() {
           onReady={(m) => (mapRef.current = m)}
           fitKey={`${ids.join(',')}|${ids.length ? '' : tab}|${results?.title || ''}|${results?.loading}`}
         />
-      </section>
-
-      <section className="c-section">
-        <h2 className="title c-h2">추천 코스 불러오기</h2>
-        <div className="course-grid">
-          {COURSES.map((c) => (
-            <button key={c.id} className={`course-card ${course.courseId === c.id ? 'on' : ''}`} onClick={() => loadCourse(c)}>
-              <span className="course-emoji" aria-hidden="true">{c.emoji}</span>
-              <span className="course-title">{c.title}</span>
-              <span className="course-sum">{c.summary}</span>
-              {c.uphill && <span className="chip chip-hill">오르막 코스</span>}
-            </button>
-          ))}
+        <div className="c-map-overlay">
+          <form className="search" onSubmit={onSearch} role="search">
+            <input
+              className="search-input"
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="성북동에서 찾기 (예: 칼국수, 서점)"
+              enterKeyHint="search"
+            />
+            <button className="btn btn-dark btn-sm" type="submit">찾기</button>
+          </form>
+          {!results && (
+            <div className="tabs" role="tablist">
+              {CATEGORY_ORDER.map((cat) => (
+                <button
+                  key={cat}
+                  role="tab"
+                  aria-selected={tab === cat}
+                  className={`tab ${tab === cat ? 'on' : ''}`}
+                  style={{ '--cat': CATEGORIES[cat].color }}
+                  onClick={() => setTab(cat)}
+                >
+                  {CATEGORIES[cat].label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      <section className="c-section">
-        <h2 className="title c-h2">직접 고르기</h2>
-        <form className="search" onSubmit={onSearch} role="search">
-          <input
-            className="search-input"
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="성북동에서 찾기 (예: 칼국수, 서점)"
-            enterKeyHint="search"
-          />
-          <button className="btn btn-dark btn-sm" type="submit">찾기</button>
-        </form>
+      <div className="c-panel">
+        <div className="c-panel-handle" aria-hidden="true" />
 
-        {!results && (
-          <div className="tabs" role="tablist">
-            {CATEGORY_ORDER.map((cat) => (
-              <button
-                key={cat}
-                role="tab"
-                aria-selected={tab === cat}
-                className={`tab ${tab === cat ? 'on' : ''}`}
-                style={{ '--cat': CATEGORIES[cat].color }}
-                onClick={() => setTab(cat)}
-              >
-                {CATEGORIES[cat].label}
+        <section className="c-section">
+          <h2 className="title c-h2">추천 코스 불러오기</h2>
+          <div className="course-grid">
+            {COURSES.map((c) => (
+              <button key={c.id} className={`course-card ${course.courseId === c.id ? 'on' : ''}`} onClick={() => loadCourse(c)}>
+                <span className="course-emoji" aria-hidden="true">{c.emoji}</span>
+                <span className="course-title">{c.title}</span>
+                <span className="course-sum">{c.summary}</span>
+                {c.uphill && <span className="chip chip-hill">오르막 코스</span>}
               </button>
             ))}
           </div>
-        )}
+        </section>
 
-        {results && (
-          <div className="results-head">
-            <b>{results.title}</b>
-            <button className="btn btn-sm" onClick={closeResults}>← 추천 장소로</button>
-          </div>
-        )}
-        {results?.loading && <p className="muted">찾는 중…</p>}
-        {results?.error && <p className="muted">{results.error}</p>}
+        <section className="c-section">
+          <h2 className="title c-h2">{results ? '검색 결과' : `${CATEGORIES[tab].label} 장소`}</h2>
+          {results && (
+            <div className="results-head">
+              <b>{results.title}</b>
+              <button className="btn btn-sm" onClick={closeResults}>← 추천 장소로</button>
+            </div>
+          )}
+          {results?.loading && <p className="muted">찾는 중…</p>}
+          {results?.error && <p className="muted">{results.error}</p>}
 
-        <ul className="place-list">
-          {listItems.map((p) => {
-            const inCourse = ids.includes(p.id)
-            return (
-              <li key={p.id} className={`place-row card ${inCourse ? 'in' : ''}`}>
-                <button className="place-row-main" onClick={() => setSelected(p)}>
-                  <PlaceImage place={p} className="place-thumb" />
-                  <span className="place-row-text">
-                    <span className="place-row-name">
-                      {inCourse && <span className="num">{ids.indexOf(p.id) + 1}</span>}
-                      {p.name}
+          <ul className="place-list">
+            {listItems.map((p) => {
+              const inCourse = ids.includes(p.id)
+              return (
+                <li key={p.id} className={`place-row card ${inCourse ? 'in' : ''}`}>
+                  <button className="place-row-main" onClick={() => setSelected(p)}>
+                    <PlaceImage place={p} className="place-thumb" />
+                    <span className="place-row-text">
+                      <span className="place-row-name">
+                        {inCourse && <span className="num">{ids.indexOf(p.id) + 1}</span>}
+                        {p.name}
+                      </span>
+                      <span className="place-row-desc">{p.custom ? `${CATEGORIES[p.cat].label} · ${p.desc}` : p.desc}</span>
+                      <span className="place-row-tags">
+                        {p.custom && <span className="chip">카카오맵</span>}
+                        {p.hill && <span className="chip chip-hill">경사</span>}
+                        {p.tags.slice(0, 2).map((t) => (
+                          <span key={t} className="chip">{t}</span>
+                        ))}
+                      </span>
                     </span>
-                    <span className="place-row-desc">{p.custom ? `${CATEGORIES[p.cat].label} · ${p.desc}` : p.desc}</span>
-                    <span className="place-row-tags">
-                      {p.custom && <span className="chip">카카오맵</span>}
-                      {p.hill && <span className="chip chip-hill">경사</span>}
-                      {p.tags.slice(0, 2).map((t) => (
-                        <span key={t} className="chip">{t}</span>
-                      ))}
-                    </span>
-                  </span>
-                </button>
-                <button className={`btn btn-sm ${inCourse ? 'btn-dark' : 'btn-primary'}`} onClick={() => toggle(p)} disabled={busyId === p.id}>
-                  {busyId === p.id ? '…' : inCourse ? '빼기' : '담기'}
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-        {!results && (
-          <button className="btn btn-block more-btn" onClick={onNearby}>
-            🗺️ 지도 근처 {CATEGORIES[tab].label} 더 찾기 (카카오맵)
-          </button>
-        )}
-      </section>
+                  </button>
+                  <button className={`btn btn-sm ${inCourse ? 'btn-dark' : 'btn-primary'}`} onClick={() => toggle(p)} disabled={busyId === p.id}>
+                    {busyId === p.id ? '…' : inCourse ? '빼기' : '담기'}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+          {!results && (
+            <button className="btn btn-block more-btn" onClick={onNearby}>
+              🗺️ 지도 근처 {CATEGORIES[tab].label} 더 찾기 (카카오맵)
+            </button>
+          )}
+        </section>
+      </div>
 
       <div className="c-bar">
         {ids.length ? (

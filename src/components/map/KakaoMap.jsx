@@ -110,7 +110,7 @@ export default function KakaoMap({
 
     if (path.length > 1) {
       const linePath = path.map((p) => new maps.LatLng(p.lat, p.lng))
-      for (const [color, weight] of [['#4A3A30', 9], ['#F6D77A', 4]]) {
+      for (const [color, weight] of [['#FFFFFF', 9], ['#789477', 5]]) {
         const line = new maps.Polyline({ path: linePath, strokeWeight: weight, strokeColor: color, strokeOpacity: 1, strokeStyle: 'solid' })
         line.setMap(map)
         drawn.current.push(line)
@@ -151,7 +151,7 @@ export default function KakaoMap({
     })
 
     if (showStation) {
-      add(STATION, { label: '한성대입구역', text: '역', color: '#4A3A30', classes: 'pin-station' }, 4)
+      add(STATION, { label: '한성대입구역', text: '역', color: '#252925', classes: 'pin-station' }, 4)
     }
   }, [status, stops, candidates, path, selectedId, flagged, showStation, onSelect, restrooms])
 

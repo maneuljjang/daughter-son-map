@@ -41,7 +41,7 @@ export default function RoadviewWalker({ route, startStopId, onClose }) {
           disableDoubleClickZoom: true,
         })
         const path = routePath(route).map((p) => new maps.LatLng(p.lat, p.lng))
-        new maps.Polyline({ path, strokeWeight: 5, strokeColor: '#4A3A30', strokeOpacity: 0.9 }).setMap(mini)
+        new maps.Polyline({ path, strokeWeight: 5, strokeColor: '#789477', strokeOpacity: 0.95 }).setMap(mini)
         const me = new maps.CustomOverlay({ content: '<div class="rv-me"></div>', position: path[0], zIndex: 3 })
         me.setMap(mini)
         // 로드뷰가 열리면 다음 지점 쪽을 바라보게

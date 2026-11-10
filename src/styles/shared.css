@@ -1,112 +1,118 @@
-/* ── 요약: 한 장 카드 안에 세 칸 ─────────────────── */
+/* 자녀·부모님 화면이 함께 쓰는 부분 (같은 서비스로 보이도록 모양을 통일) */
+
+/* ── 요약: 거리 · 시간 · 난이도 한 줄 ─────────────────── */
 .summary {
   display: grid; grid-template-columns: 1fr 1fr 1fr;
-  border: var(--line); border-radius: var(--radius); background: var(--paper);
+  border: var(--line); border-radius: var(--radius); background: var(--bg);
 }
 .summary-item {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   padding: 12px 6px; text-align: center;
 }
-.summary-item + .summary-item { border-left: var(--line-thin); }
-.summary-k { font-size: 13px; color: var(--brown-soft); font-weight: 500; }
-.summary-v { font-weight: 900; font-size: 19px; line-height: 1.2; }
-.summary-v .estimate { display: block; font-size: 12px; margin-top: 2px; }
-.summary-lg .summary-k { font-size: 15px; }
-.summary-lg .summary-v { font-size: 23px; }
-.summary-lg .level { font-size: 22px; }
+.summary-item + .summary-item { border-left: var(--line); }
+.summary-k { font-size: 12px; color: var(--text-2); font-weight: 500; }
+.summary-v { font-weight: 700; font-size: 18px; line-height: 1.25; }
+.summary-v .estimate { display: block; font-size: 11px; margin-top: 2px; }
+.summary-lg .summary-k { font-size: 14px; }
+.summary-lg .summary-v { font-size: 22px; }
+.summary-lg .level { font-size: 18px; }
 
-/* ── 장소 사이 구간 ─────────────────────────── */
-.segment { display: flex; gap: 12px; padding: 4px 0 4px 18px; }
-.segment-line { width: 0; border-left: 3px dotted var(--brown-soft); margin: 4px 0; flex: none; }
-.segment-body { padding: 8px 0; font-size: 15px; line-height: 1.6; }
-.segment-bus { color: var(--teal); font-weight: 700; }
-.segment-final .segment-body { font-weight: 700; }
+/* ── 이동 구간: 타임라인의 선 위에 걷는 정보 ─────────────────── */
+.segment { display: flex; gap: 14px; padding: 0 0 0 16px; }
+.segment-line { width: 0; border-left: 2px dashed #cdd5cc; margin: 0; flex: none; }
+.segment-body { padding: 10px 0; font-size: 14px; line-height: 1.6; color: #5c615c; }
+.segment-bus { color: var(--primary-text); font-weight: 600; }
+.segment-final .segment-body { font-weight: 600; color: var(--text); }
 
 /* ── 안내 상자 ─────────────────────────────── */
 .notice-box {
-  border-radius: 14px; padding: 12px 14px;
-  background: var(--butter-soft); font-size: 15px; line-height: 1.65;
+  border-radius: 12px; padding: 12px 14px;
+  background: var(--bg-2); font-size: 14px; line-height: 1.65; color: var(--text);
 }
-.notice-box b { font-weight: 900; }
-.notice-box.warn { background: var(--pink-soft); color: #6e2416; }
+.notice-box b { font-weight: 700; }
+.notice-box.warn { background: var(--warn-soft); color: var(--warn); }
 
 /* ── 날씨 ─────────────────────────────── */
 .weather {
-  margin-top: 12px; padding: 12px 14px; border-radius: 14px; background: #e4eff0;
-  font-size: 15px; line-height: 1.6;
+  margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: var(--bg-2);
+  font-size: 14px; line-height: 1.6;
 }
-.weather.muted { background: var(--paper); border: var(--line-thin); }
+.weather.muted { color: var(--text-2); }
 .weather-main { display: flex; align-items: center; gap: 10px; }
-.weather-icon { font-size: 1.8em; line-height: 1; }
-.weather-sub { color: var(--brown-soft); }
-.weather-tips { margin: 8px 0 0; padding: 0 0 0 1.2em; font-weight: 700; color: var(--teal); }
+.weather-icon { font-size: 1.7em; line-height: 1; }
+.weather-sub { color: var(--text-2); font-size: 0.92em; }
+.weather-tips { margin: 6px 0 0; padding: 0 0 0 1.2em; color: var(--primary-text); font-weight: 600; }
 .weather-lg { margin: 0 0 16px; }
 
 /* 화장실 마커 */
 .pin-wc {
-  font-size: 13px; line-height: 1; padding: 3px 4px; border-radius: 8px;
-  background: #fff; border: 1.5px solid var(--brown); transform: translateY(-50%);
+  font-size: 12px; line-height: 1; padding: 3px 4px; border-radius: 6px;
+  background: #fff; box-shadow: var(--shadow); transform: translateY(-50%);
 }
 
+/* ── 장소 자세한 설명 ─────────────────────────── */
+.pd { margin: 14px 0; }
+.pd-about { margin: 0 0 12px; font-size: 1em; line-height: 1.7; color: var(--text); }
+.pd-box { padding: 12px 14px; border-radius: 12px; background: var(--bg-2); }
+.pd-box + .pd-box { margin-top: 8px; }
+.pd-title { font-weight: 700; margin-bottom: 6px; }
+.pd-menu { list-style: none; margin: 0; padding: 0; }
+.pd-menu li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 5px 0; }
+.pd-menu li + li { border-top: 1px solid var(--border); }
+.pd-menu b { flex: none; font-weight: 600; }
+.pd-note { margin: 6px 0 0; font-size: 0.8em; color: var(--text-2); }
+.pd-points { margin: 0; padding-left: 1.2em; }
+.pd-points li + li { margin-top: 4px; }
+
 /* ── 미리 걸어보기 (전체 화면) ─────────────────── */
-.rv { position: fixed; inset: 0; z-index: 70; background: var(--brown); display: flex; flex-direction: column; }
+.rv { position: fixed; inset: 0; z-index: 70; background: #1f231f; display: flex; flex-direction: column; }
 .rv-view { position: relative; flex: 1; min-height: 0; }
 .rv-canvas { position: absolute; inset: 0; }
 .rv-msg {
   position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
-  color: var(--cream); font-size: 19px; line-height: 1.6; padding: 24px;
-  background: rgba(74, 58, 48, 0.82); pointer-events: none;
+  color: #fff; font-size: 18px; line-height: 1.6; padding: 24px;
+  background: rgba(31, 35, 31, 0.8); pointer-events: none;
 }
 .rv-close {
   position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; z-index: 3;
-  width: auto; height: 52px; padding: 0 16px; font-size: 18px; font-weight: 700;
+  height: 44px; min-height: 44px; padding: 0 16px; box-shadow: var(--shadow-float);
 }
 .rv-mini {
   position: absolute; left: 12px; bottom: 30px; z-index: 3;
-  width: 116px; height: 116px; border: var(--line); border-radius: 14px; overflow: hidden; background: #e9e2cc;
+  width: 112px; height: 112px; border: 2px solid #fff; border-radius: 14px; overflow: hidden;
+  background: var(--bg-2); box-shadow: var(--shadow-float);
 }
-.rv-me { width: 16px; height: 16px; border-radius: 50%; background: var(--tomato); border: 3px solid #fff; box-shadow: 0 0 0 2px var(--brown); }
+.rv-me { width: 16px; height: 16px; border-radius: 50%; background: var(--primary); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4); }
 .rv-panel {
-  background: var(--cream); border-top: var(--line); border-radius: 22px 22px 0 0;
-  padding: 16px 18px calc(18px + var(--safe-bottom)); margin-top: -18px; position: relative; z-index: 4;
+  background: var(--bg); border-radius: 20px 20px 0 0;
+  padding: 16px 20px calc(18px + var(--safe-bottom)); margin-top: -18px; position: relative; z-index: 4;
 }
 .rv-progress { display: flex; gap: 3px; margin-bottom: 14px; }
-.rv-dot { flex: 1; height: 6px; border-radius: 3px; background: rgba(74, 58, 48, 0.15); }
+.rv-dot { flex: 1; height: 4px; border-radius: 2px; background: var(--border); }
 .rv-dot-stop { flex: 1.6; }
-.rv-dot.on { background: var(--brown); }
-.rv-tag { display: inline-block; color: #fff; font-weight: 700; font-size: 16px; padding: 3px 12px; border-radius: 8px; }
-.rv-title { font-size: 28px; margin: 8px 0 4px; }
-.rv-sub { margin: 0 0 16px; font-size: 18px; line-height: 1.55; min-height: 2.9em; }
-.rv-controls { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; margin-bottom: 10px; }
-
-/* ── 장소 자세한 설명 ─────────────────────────── */
-.pd { margin: 14px 0; }
-.pd-about { margin: 0 0 12px; font-size: 1em; line-height: 1.7; }
-.pd-box { padding: 12px 14px; border: var(--line-thin); border-radius: 12px; background: var(--paper); }
-.pd-box + .pd-box { margin-top: 10px; }
-.pd-title { font-weight: 900; margin-bottom: 6px; }
-.pd-menu { list-style: none; margin: 0; padding: 0; }
-.pd-menu li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 5px 0; }
-.pd-menu li + li { border-top: 1px dashed var(--line-soft); }
-.pd-menu b { flex: none; font-weight: 700; }
-.pd-note { margin: 6px 0 0; font-size: 0.8em; color: var(--brown-soft); }
-.pd-points { margin: 0; padding-left: 1.2em; }
-.pd-points li + li { margin-top: 4px; }
+.rv-dot.on { background: var(--primary); }
+.rv-tag {
+  display: inline-block; font-weight: 600; font-size: 14px; padding: 3px 10px; border-radius: 6px;
+  background: var(--primary-soft) !important; color: var(--primary-text);
+}
+.rv-title { font-size: 24px; margin: 8px 0 4px; }
+.rv-sub { margin: 0 0 16px; font-size: 17px; line-height: 1.55; min-height: 2.9em; color: #5c615c; }
+.rv-controls { display: grid; grid-template-columns: 1fr 1.4fr; gap: 8px; margin-bottom: 8px; }
 
 /* ── 카카오맵 사진 보기 (전체 화면) ─────────────────── */
-.kv { position: fixed; inset: 0; z-index: 90; display: flex; flex-direction: column; background: var(--cream); }
+.kv { position: fixed; inset: 0; z-index: 90; display: flex; flex-direction: column; background: var(--bg); }
 .kv-head {
   display: flex; align-items: center; justify-content: space-between; gap: 10px; flex: none;
-  padding: calc(10px + env(safe-area-inset-top, 0px)) 14px 10px; border-bottom: var(--line);
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 16px 10px; border-bottom: var(--line);
 }
-.kv-title { font-size: 21px; min-width: 0; }
+.kv-title { font-size: 18px; min-width: 0; }
 .kv-body { position: relative; flex: 1; min-height: 0; background: #fff; }
 .kv-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 .kv-loading {
   position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 12px; padding: 24px; text-align: center; background: var(--cream); font-size: 18px;
+  gap: 12px; padding: 24px; text-align: center; background: var(--bg); font-size: 17px; color: var(--text-2);
 }
 .kv-foot {
-  flex: none; padding: 12px 14px calc(12px + var(--safe-bottom)); text-align: center;
-  border-top: var(--line-thin); font-size: 15px; font-weight: 700;
+  flex: none; padding: 12px 16px calc(12px + var(--safe-bottom)); text-align: center;
+  border-top: var(--line); font-size: 14px; font-weight: 600; color: var(--primary-text);
 }

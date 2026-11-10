@@ -113,7 +113,7 @@ export default function InviteApp() {
       {/* 장소 카드 */}
       <section className="iv-section">
         <h2 className="title iv-h2">갈 곳 {stops.length}곳</h2>
-        <p className="iv-note">마음에 드시면 [좋아요], 힘드실 것 같으면 [힘들 것 같아]를 눌러 주세요.</p>
+        <p className="iv-note">마음에 드시면 [좋아요], 힘드실 것 같으면 [힘들 것 같아요]를 눌러 주세요.</p>
         <ol className="iv-list">
           {stops.map((p, i) => {
             const wc = restrooms.byStop[p.id]
@@ -134,42 +134,17 @@ export default function InviteApp() {
                   </div>
 
                   <PlaceImage place={p} />
-                  {p.about ? <PlaceDetails place={p} /> : <p className="iv-desc">{p.desc}</p>}
+                  <p className="iv-desc">{p.desc}</p>
+                  {p.hill && <p className="iv-hill">⛰️ 경사나 계단이 있어요</p>}
 
-                  <dl className="iv-info">
-                    {p.hoursText && (
-                      <div>
-                        <dt>🕘 여는 시간</dt>
-                        <dd>{p.hoursText}</dd>
-                      </div>
-                    )}
-                    {p.fee && (
-                      <div>
-                        <dt>🎫 입장료</dt>
-                        <dd>{p.fee}</dd>
-                      </div>
-                    )}
-                    {p.parking && (
-                      <div>
-                        <dt>🚗 주차</dt>
-                        <dd>{p.parking}</dd>
-                      </div>
-                    )}
-                    <div>
-                      <dt>🚻 화장실</dt>
-                      <dd>{wc ? `${wc.name} · ${roundM(wc.meters)}m` : '근처 정보가 없어요. 식당·카페에서 이용하세요.'}</dd>
-                    </div>
-                    <div>
-                      <dt>🪑 쉬는 곳</dt>
-                      <dd>{p.rest || (p.custom ? '카카오맵에서 확인해 주세요.' : '확인 중이에요.')}</dd>
-                    </div>
-                    {notice && (
-                      <div>
-                        <dt>📌 알아두기</dt>
-                        <dd>{notice}</dd>
-                      </div>
-                    )}
-                  </dl>
+                  <div className="btn-row iv-votes">
+                    <button className={`iv-vote like ${votes[p.id] === 'like' ? 'on' : ''}`} onClick={() => vote(p.id, 'like')} aria-pressed={votes[p.id] === 'like'}>
+                      <span aria-hidden="true">👍</span> 좋아요
+                    </button>
+                    <button className={`iv-vote hard ${votes[p.id] === 'hard' ? 'on' : ''}`} onClick={() => vote(p.id, 'hard')} aria-pressed={votes[p.id] === 'hard'}>
+                      <span aria-hidden="true">😮‍💨</span> 힘들 것 같아요
+                    </button>
+                  </div>
 
                   <div className="btn-row iv-actions">
                     <button className="btn" onClick={() => setWalkFrom(p.id)}>🚶 거리 보기</button>
@@ -178,14 +153,45 @@ export default function InviteApp() {
                     </button>
                   </div>
 
-                  <div className="btn-row iv-votes">
-                    <button className={`iv-vote like ${votes[p.id] === 'like' ? 'on' : ''}`} onClick={() => vote(p.id, 'like')} aria-pressed={votes[p.id] === 'like'}>
-                      <span aria-hidden="true">👍</span> 좋아요
-                    </button>
-                    <button className={`iv-vote hard ${votes[p.id] === 'hard' ? 'on' : ''}`} onClick={() => vote(p.id, 'hard')} aria-pressed={votes[p.id] === 'hard'}>
-                      <span aria-hidden="true">😮‍💨</span> 힘들 것 같아
-                    </button>
-                  </div>
+                  {/* 메뉴·여는 시간·화장실 같은 자세한 정보는 접어 두기 */}
+                  <details className="iv-more">
+                    <summary>자세히 보기</summary>
+                    {p.about && <PlaceDetails place={p} />}
+                    <dl className="iv-info">
+                      {p.hoursText && (
+                        <div>
+                          <dt>🕘 여는 시간</dt>
+                          <dd>{p.hoursText}</dd>
+                        </div>
+                      )}
+                      {p.fee && (
+                        <div>
+                          <dt>🎫 입장료</dt>
+                          <dd>{p.fee}</dd>
+                        </div>
+                      )}
+                      {p.parking && (
+                        <div>
+                          <dt>🚗 주차</dt>
+                          <dd>{p.parking}</dd>
+                        </div>
+                      )}
+                      <div>
+                        <dt>🚻 화장실</dt>
+                        <dd>{wc ? `${wc.name} · ${roundM(wc.meters)}m` : '근처 정보가 없어요. 식당·카페에서 이용하세요.'}</dd>
+                      </div>
+                      <div>
+                        <dt>🪑 쉬는 곳</dt>
+                        <dd>{p.rest || (p.custom ? '카카오맵에서 확인해 주세요.' : '확인 중이에요.')}</dd>
+                      </div>
+                      {notice && (
+                        <div>
+                          <dt>📌 알아두기</dt>
+                          <dd>{notice}</dd>
+                        </div>
+                      )}
+                    </dl>
+                  </details>
                 </li>
                 {route.segments[i] && <SegmentInfo segment={route.segments[i]} />}
               </Fragment>
@@ -205,8 +211,8 @@ export default function InviteApp() {
       </section>
 
       <div className="iv-bar">
-        <button className="btn btn-kakao btn-lg btn-block btn-lift" onClick={() => setReplyOpen(true)}>
-          💬 답장 보내기{voteCount ? ` (${voteCount}곳 골랐어요)` : ''}
+        <button className="btn btn-primary btn-lg btn-block btn-lift" onClick={() => setReplyOpen(true)}>
+          💬 의견 보내기{voteCount ? ` (${voteCount}곳 골랐어요)` : ''}
         </button>
       </div>
 
