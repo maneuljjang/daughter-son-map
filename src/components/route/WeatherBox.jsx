@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { fetchWeather, FORECAST_DAYS } from '../../lib/weather.js'
 
 /** 정한 날짜의 날씨 예보 (날짜가 없으면 아무것도 안 보여요) */
-export default function WeatherBox({ date, time, large = false }) {
+export default function WeatherBox({ date, time, large = false, compact = false }) {
   const [w, setW] = useState(null)
   useEffect(() => {
     let alive = true
@@ -15,7 +15,19 @@ export default function WeatherBox({ date, time, large = false }) {
 
   if (!date || !w || w.status === 'error' || w.status === 'past') return null
   if (w.status === 'far') {
-    return <div className={`weather ${large ? 'weather-lg' : ''} muted`}>🌤️ 날씨 예보는 나들이 {FORECAST_DAYS}일 전부터 볼 수 있어요.</div>
+    return <div className={`weather ${large ? 'weather-lg' : ''} ${compact ? 'weather-line' : ''} muted`}>🌤️ 날씨 예보는 나들이 {FORECAST_DAYS}일 전부터 볼 수 있어요.</div>
+  }
+  // 한 줄 요약: 날씨·기온·비 확률, 챙길 것이 있을 때만 한 줄 더
+  if (compact) {
+    const tips = w.advice.filter((t) => !t.startsWith('걷기 좋은'))
+    return (
+      <div className="weather weather-line">
+        <div className="weather-main">
+          <span aria-hidden="true">{w.icon}</span> {w.text} · {w.tMin}°~{w.tMax}° · 비 {w.rain}%
+        </div>
+        {tips.length > 0 && <div className="weather-tip">{tips.join(' ')}</div>}
+      </div>
+    )
   }
   return (
     <div className={`weather ${large ? 'weather-lg' : ''}`}>

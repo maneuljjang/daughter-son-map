@@ -7,8 +7,7 @@ import { useWalkPaths, useRestrooms } from '../lib/useRouteExtras.js'
 import WeatherBox from '../components/route/WeatherBox.jsx'
 import FontSizeButtons from './FontSizeButtons.jsx'
 import { buildSchedule, fmtTime, formatWhen } from '../lib/schedule.js'
-import { START_GUIDE, BUS } from '../data/transit.js'
-import { buildRoute, routePath, formatKm, formatMin } from '../lib/route.js'
+import { buildRoute, routePath } from '../lib/route.js'
 import { readParams, asset } from '../lib/url.js'
 import { submitVote, getVotes, josa } from '../feedback/index.js'
 import KakaoMap from '../components/map/KakaoMap.jsx'
@@ -17,6 +16,7 @@ import RouteSummary from '../components/route/RouteSummary.jsx'
 import { SegmentInfo, FinalLegInfo } from '../components/route/SegmentInfo.jsx'
 import RoadviewWalker from '../components/roadview/RoadviewWalker.jsx'
 import ReplySheet from './ReplySheet.jsx'
+import RouteDetail from './RouteDetail.jsx'
 
 const roundM = (m) => Math.max(10, Math.round(m / 10) * 10)
 
@@ -33,6 +33,8 @@ export default function InviteApp() {
   const [walkFrom, setWalkFrom] = useState(undefined) // undefined: 닫힘, null: 처음부터, id: 그 장소부터
   const [replyOpen, setReplyOpen] = useState(false)
   const [photoOf, setPhotoOf] = useState(null)
+  const [routeOpen, setRouteOpen] = useState(false)
+  const closeRoute = useCallback(() => setRouteOpen(false), [])
   const closePhoto = useCallback(() => setPhotoOf(null), [])
 
   if (!stops.length) {
@@ -59,111 +61,98 @@ export default function InviteApp() {
   }
   const voteCount = Object.keys(votes).filter((k) => ids.includes(k)).length
 
+  const openWalk = (id) => setWalkFrom(id)
+
   return (
     <div className="app invite">
       <div className="iv-top">
-        <span className="iv-from">💌 {from ? `${from}${josa(from, '이', '가')} 보낸 초대장` : '딸, 아들이 보낸 초대장'}</span>
+        <span className="iv-from">{from ? `${from}${josa(from, '이', '가')} 보낸 초대장` : '딸, 아들이 보낸 초대장'}</span>
         <FontSizeButtons />
       </div>
 
-      {/* 표지 */}
+      {/* 초대장 소개 */}
       <header className="iv-cover">
-        <h1 className="title iv-headline riso-shadow">
-          엄마, 아빠
+        <h1 className="title iv-headline">
+          엄마, 아빠!
           <br />
-          이번에 올라오시면
-          <br />
-          <span className="iv-hl">여기 가요</span>
+          이번에 <span className="iv-hl">여기</span> 같이 가요.
         </h1>
-        {(date || time) && <p className="iv-when">📅 {formatWhen(date, time)}</p>}
-        <WeatherBox date={date} time={time} large />
-
-        <ol className="iv-route-line">
-          {stops.map((p, i) => (
-            <li key={p.id}>
-              <span className="iv-dot" style={{ background: CATEGORIES[p.cat].color }}>{i + 1}</span>
-              {p.name}
-            </li>
-          ))}
-        </ol>
-
-        <RouteSummary route={route} large />
-
-        <div className="notice-box iv-start">
-          <b>🚌 출발은 이렇게</b>
-          <br />
-          {START_GUIDE(stops[0].name)}
-        </div>
-
-        <button className="btn btn-dark btn-lg btn-block iv-walk" onClick={() => setWalkFrom(null)}>
-          🚶 길 미리 걸어보기
-        </button>
-        <p className="iv-hint">실제 거리 사진으로 코스를 따라 걸어 봐요</p>
+        {(date || time) && (
+          <p className="iv-when">
+            {formatWhen(date, time)}
+            {time ? ' 출발' : ''}
+          </p>
+        )}
       </header>
 
-      {/* 지도 */}
-      <section className="iv-section">
-        <h2 className="title iv-h2">코스 지도</h2>
-        <KakaoMap className="iv-map" locked stops={stops} path={path} restrooms={restrooms.all} showStation={route.finalLeg?.walkable} fitKey={ids.join(',')} />
-        <p className="iv-note">
-          숫자 순서대로 걸어요. 높은 곳에서 낮은 곳으로 내려와요.
-          {restrooms.all.length > 0 && ' 🚻는 화장실이에요.'}
-        </p>
+      {/* 오늘의 나들이 요약: 거리 · 시간 · 난이도 + 날씨 한 줄 */}
+      <section className="iv-today" aria-label="오늘의 나들이 요약">
+        <RouteSummary route={route} large />
+        <WeatherBox date={date} time={time} compact />
       </section>
 
-      {/* 장소 카드 */}
+      {/* 이동 경로: 작은 지도 미리보기 → 누르면 자세히 */}
+      <section className="iv-section iv-route-sec">
+        <div className="iv-map-wrap">
+          <KakaoMap className="iv-map" locked stops={stops} path={path} showStation={route.finalLeg?.walkable} fitKey={ids.join(',')} />
+          <button className="iv-map-tap" onClick={() => setRouteOpen(true)} aria-label="경로 자세히 보기" />
+        </div>
+        <div className="btn-row iv-map-actions">
+          <button className="btn" onClick={() => setRouteOpen(true)}>🗺️ 경로 자세히 보기</button>
+          <button className="btn" onClick={() => openWalk(null)}>🚶 길 미리 걸어보기</button>
+        </div>
+      </section>
+
+      {/* 함께 갈 장소 */}
       <section className="iv-section iv-pick">
         <div className="iv-pick-head">
-          <span className="iv-pick-step">부모님 차례예요</span>
-          <h2 className="title iv-h2">장소마다 골라 주세요</h2>
-          <p className="iv-note">마음에 드시면 [좋아요], 힘드실 것 같으면 [힘들 것 같아요]를 눌러 주세요.</p>
-          <div className="iv-progress" aria-label={`${stops.length}곳 중 ${voteCount}곳 골랐어요`}>
-            <div className="iv-progress-text">
-              <b>{stops.length}곳 중 {voteCount}곳</b> 골랐어요
-            </div>
-            <div className="iv-progress-bar">
-              <span style={{ width: `${(voteCount / stops.length) * 100}%` }} />
-            </div>
-          </div>
+          <h2 className="title iv-h2">함께 갈 장소</h2>
+          <p className="iv-note">마음에 드는 곳을 선택해주세요.</p>
         </div>
         <ol className="iv-list">
           {stops.map((p, i) => {
             const wc = restrooms.byStop[p.id]
             const s = schedule?.[i]
             const notice = [p.hill && '경사나 계단이 있어요.', p.notice].filter(Boolean).join(' ')
+            const v = votes[p.id]
             return (
               <Fragment key={p.id}>
-                <li className={`iv-card card ${votes[p.id] ? `voted-${votes[p.id]}` : ''}`}>
-                  {votes[p.id] && (
-                    <div className={`iv-status ${votes[p.id]}`}>
-                      {votes[p.id] === 'like' ? '👍 좋아요 했어요' : '😮‍💨 힘들 것 같다고 했어요'}
-                    </div>
-                  )}
+                <li className={`iv-card ${v ? `voted-${v}` : ''}`}>
                   <div className="iv-card-head">
-                    <span className="iv-num" style={{ background: CATEGORIES[p.cat].color }}>{i + 1}</span>
+                    <div className="iv-thumb-wrap">
+                      <PlaceImage place={p} className="iv-thumb" />
+                      <span className="iv-num" style={{ background: CATEGORIES[p.cat].color }}>{i + 1}</span>
+                    </div>
                     <div className="iv-card-title">
-                      <h3 className="title iv-name">{p.name}</h3>
+                      <h3 className="title iv-name">
+                        {p.name}
+                        {p.hill && <span className="chip chip-hill iv-hill">계단·경사</span>}
+                      </h3>
                       <div className="iv-cat">
-                        {CATEGORIES[p.cat].label}
-                        {s && <b className="iv-time"> · {fmtTime(s.arrive)} 도착, 약 {s.stay}분</b>}
+                        {s ? <b className="iv-time">{fmtTime(s.arrive)} 도착 · {s.stay}분 머물러요</b> : CATEGORIES[p.cat].label}
                       </div>
+                      <p className="iv-desc">{hidePrice ? stripPrice(p.desc) : p.desc}</p>
                     </div>
                   </div>
 
-                  <PlaceImage place={p} />
-                  <p className="iv-desc">{hidePrice ? stripPrice(p.desc) : p.desc}</p>
-                  {p.hill && <p className="iv-hill">⛰️ 경사나 계단이 있어요</p>}
-
-                  <div className="btn-row iv-actions">
-                    <button className="btn" onClick={() => setWalkFrom(p.id)}>🚶 거리 보기</button>
-                    <button className="btn" onClick={() => setPhotoOf(p)}>
-                      📷 {p.cat === 'food' ? '식당 사진' : p.cat === 'cafe' ? '가게 사진' : '사진 보기'}
+                  <div className="btn-row iv-votes" role="group" aria-label={`${p.name} 어떠세요?`}>
+                    <button className={`iv-vote like ${v === 'like' ? 'on' : ''}`} onClick={() => vote(p.id, 'like')} aria-pressed={v === 'like'}>
+                      <span aria-hidden="true">👍</span> 좋아요
+                    </button>
+                    <button className={`iv-vote hard ${v === 'hard' ? 'on' : ''}`} onClick={() => vote(p.id, 'hard')} aria-pressed={v === 'hard'}>
+                      <span aria-hidden="true">😮‍💨</span> 힘들 것 같아요
                     </button>
                   </div>
 
-                  {/* 메뉴·여는 시간·화장실 같은 자세한 정보는 접어 두기 */}
+                  {/* 길·사진·메뉴·여는 시간·화장실 같은 부가 정보는 접어 두기 */}
                   <details className="iv-more">
                     <summary>자세히 보기</summary>
+                    <div className="btn-row iv-actions">
+                      <button className="btn" onClick={() => openWalk(p.id)}>🚶 거리 보기</button>
+                      <button className="btn" onClick={() => setPhotoOf(p)}>
+                        📷 {p.cat === 'food' ? '식당 사진' : p.cat === 'cafe' ? '가게 사진' : '사진 보기'}
+                      </button>
+                    </div>
                     {p.about && <PlaceDetails place={p} hidePrice={hidePrice} />}
                     <dl className="iv-info">
                       {p.hoursText && (
@@ -200,19 +189,6 @@ export default function InviteApp() {
                       )}
                     </dl>
                   </details>
-
-                  {/* 고르는 부분: 질문과 버튼을 한 묶음으로 */}
-                  <div className="iv-ask">
-                    <p className="iv-ask-q">이곳 어떠세요?</p>
-                    <div className="btn-row iv-votes">
-                      <button className={`iv-vote like ${votes[p.id] === 'like' ? 'on' : ''}`} onClick={() => vote(p.id, 'like')} aria-pressed={votes[p.id] === 'like'}>
-                        <span aria-hidden="true">👍</span> 좋아요
-                      </button>
-                      <button className={`iv-vote hard ${votes[p.id] === 'hard' ? 'on' : ''}`} onClick={() => vote(p.id, 'hard')} aria-pressed={votes[p.id] === 'hard'}>
-                        <span aria-hidden="true">😮‍💨</span> 힘들 것 같아요
-                      </button>
-                    </div>
-                  </div>
                 </li>
                 {route.segments[i] && <SegmentInfo segment={route.segments[i]} />}
               </Fragment>
@@ -222,28 +198,30 @@ export default function InviteApp() {
         <FinalLegInfo finalLeg={route.finalLeg} />
       </section>
 
-      <section className="iv-section iv-foot">
-        <p>
-          모두 합쳐 약 <b>{formatKm(route.totalWalk)}</b>, <b>{formatMin(route.totalMinutes)}</b> 걸어요{route.real ? '' : ' (추정치)'}.
-          <br />
-          힘드시면 언제든 마을버스 {BUS}를 타면 돼요.
-        </p>
-        <p className="muted">운영 시간과 휴무일은 가기 전에 다시 확인할게요.</p>
-      </section>
-
       <div className="iv-bar">
         <p className="iv-bar-status">
           {voteCount === 0
             ? '장소를 골라 주시면 의견을 보낼 수 있어요'
             : voteCount < stops.length
-              ? `${voteCount}곳 골랐어요 · ${stops.length - voteCount}곳 남았어요`
+              ? `${stops.length}곳 중 ${voteCount}곳 골랐어요`
               : '다 골랐어요! 의견을 보내 주세요'}
         </p>
-        <button className="btn btn-primary btn-lg btn-block btn-lift" onClick={() => setReplyOpen(true)}>
-          💬 의견 보내기
+        <button className="btn btn-primary btn-lg btn-block" onClick={() => setReplyOpen(true)}>
+          의견 보내기
         </button>
       </div>
 
+      {routeOpen && (
+        <RouteDetail
+          route={route}
+          stops={stops}
+          path={path}
+          restrooms={restrooms.all}
+          fitKey={ids.join(',')}
+          onWalk={() => openWalk(null)}
+          onClose={closeRoute}
+        />
+      )}
       {walkFrom !== undefined && <RoadviewWalker route={route} startStopId={walkFrom} onClose={() => setWalkFrom(undefined)} />}
       {photoOf && <KakaoPhotoViewer place={photoOf} onClose={closePhoto} />}
       {replyOpen && <ReplySheet ids={ids} inviteId={inviteId} votes={votes} extra={{ date, time, from, hidePrice }} onClose={() => setReplyOpen(false)} />}
